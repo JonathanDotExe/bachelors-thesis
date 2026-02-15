@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
-//Author: Christoph Pichler
+import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OpCode.*;
+
+//Author: Christoph Pichler (abgewandelt)
 public class Interpreter {
-	private static void interpret(int... code) {
+	public static void interpret(int... code) {
 		Interpreter interpreter = new Interpreter(code);
 		try {
 			interpreter.run();
@@ -134,65 +136,4 @@ public class Interpreter {
 		interpret(resolvedCode);
 	}
 
-	public static final int JMP_x = 0;
-	public static final int IS_NEG = 1;
-	public static final int NOT = 2;
-	public static final int LOAD_x = 3;
-	public static final int STORE_x = 4;
-	public static final int CONST_x = 5;
-	public static final int DUP = 6;
-	public static final int POP = 7;
-	public static final int ADD = 8;
-	public static final int NEG = 9;
-	public static final int MUL = 10;
-	public static final int DIV = 11;
-	public static final int REM = 12;
-	public static final int IN = 13;
-	public static final int OUT = 14;
-	public static final int OUT_INT = 15;
-
-	static class Code {
-		final Vector<Integer> code = new Vector<>();
-		private final List<Label> labels = new ArrayList<>();
-
-		void add(int... ops) {
-			for (int op : ops) {
-				code.add(op);
-			}
-		}
-
-		int[] getCode() {
-			labels.forEach(Label::fixup);
-			return code.stream().mapToInt(i -> i).toArray();
-		}
-
-		Label createLabel() {
-			Label l = new Label();
-			labels.add(l);
-			return l;
-		}
-
-		class Label {
-			private int sourceAddr = -1;
-			private int targetAddr = -1;
-
-			void targetHere() {
-				targetAddr = code.size();
-			}
-
-			void sourceHere() {
-				sourceAddr = code.size() + 1;
-			}
-
-			void fixup() {
-				if (sourceAddr < 0 || targetAddr < 0) {
-					throw new IllegalStateException("Label not resolved!");
-				}
-				int prev = code.set(sourceAddr, targetAddr - sourceAddr - 1);
-				if (prev != 0) {
-					throw new IllegalStateException("Override a jump entry");
-				}
-			}
-		}
-	}
 }

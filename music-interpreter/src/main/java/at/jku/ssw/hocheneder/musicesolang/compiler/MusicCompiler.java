@@ -1,14 +1,13 @@
 package at.jku.ssw.hocheneder.musicesolang.compiler;
 
 
+import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Interpreter;
 import org.audiveris.proxymusic.*;
 import org.audiveris.proxymusic.util.Marshalling;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +16,7 @@ public class MusicCompiler {
 
     private static final int BASE = Step.values().length;
 
-    private ScorePartwise score;
+    private final ScorePartwise score;
 
     public MusicCompiler(InputStream in) throws IOException, Marshalling.UnmarshallingException {
         try (in) {
@@ -25,11 +24,11 @@ public class MusicCompiler {
         }
     }
 
-    public int[] compile() {
+    public Code compile() {
         ScorePartwise.Part part = score.getPart().getFirst();
         //For now: always assume C major
         Step root = Step.C;
-        List<Integer> code = new ArrayList<>();
+        Code code = new Code();
 
         //Measures = commands
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
@@ -38,16 +37,14 @@ public class MusicCompiler {
             try {
                 //Arg
                 int op = nextNumber(notes, root, 2);
-                switch (op) {
-                    case Interpreter.CONST_x:
-                    case Interpreter.JMP_x:
-                    case Interpreter.LOAD_x:
-                    case Interpreter.STORE_x:
-                        int arg = nextNumber(notes, root, 8);
-                        code.add(op);
-                        code.add(arg);
-                    default:
-                        code.add(op);
+                if (Code.OpCode.hasArg(op)) {
+                    int arg = nextNumber(notes, root);
+                    code.add(op, arg);
+                } else if (Code.OpCode.isValidOpCode(op)){
+                    code.add(op);
+                }
+                else {
+                    System.out.println("Invalid opcode encountered: " + op + ". Ignoring ...");
                 }
 
             } catch (InvalidTokenException e) {
@@ -55,7 +52,7 @@ public class MusicCompiler {
             }
         }
 
-        return code.stream().mapToInt(i->i).toArray();
+        return code;
     }
 
     private static int toDigit(Step note, Step root) {
@@ -78,6 +75,15 @@ public class MusicCompiler {
         for (int i = digits - 1; i >=0; i--) {
             num *= BASE;
             num += nextDigit(notes, root);
+        }
+        return num;
+    }
+
+    private static int nextNumber(Iterator<Note> notes, Step root) {
+        int num = 0;
+        while (notes.hasNext()) {
+            num *= BASE;
+            num += toDigit(notes.next().getPitch().getStep(), root);
         }
         return num;
     }
