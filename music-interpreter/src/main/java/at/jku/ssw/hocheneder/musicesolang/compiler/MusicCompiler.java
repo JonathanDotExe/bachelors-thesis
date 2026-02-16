@@ -2,15 +2,16 @@ package at.jku.ssw.hocheneder.musicesolang.compiler;
 
 
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
-import at.jku.ssw.hocheneder.musicesolang.interpreter.Interpreter;
+import at.jku.ssw.hocheneder.musicesolang.music.NoteUtil;
 import org.audiveris.proxymusic.*;
 import org.audiveris.proxymusic.util.Marshalling;
+import org.w3c.dom.Attr;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 public class MusicCompiler {
 
@@ -32,11 +33,27 @@ public class MusicCompiler {
 
         //Measures = commands
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
+            //Root
+            Optional<Attributes> attr = measure.getNoteOrBackupOrForward().stream()
+                    .filter(o -> o instanceof Attributes)
+                    .map(o -> (Attributes) o)
+                    .findFirst();
+            if (attr.isPresent()) {
+                List<Key> key = attr.get().getKey();
+                if (!key.isEmpty()) {
+                    root = NoteUtil.fifthsToMajorScaleRootIgnoreAlter(key.getFirst().getFifths().intValue());
+                }
+                //TODO altered key signatures?
+            }
             //Notes => bytes
-            Iterator<Note> notes = measure.getNoteOrBackupOrForward().stream().filter(o -> o instanceof Note).map(o -> (Note) o).iterator();
+            Iterator<Note> notes = measure.getNoteOrBackupOrForward().stream()
+                    .filter(o -> o instanceof Note)
+                    .map(o -> (Note) o)
+                    .filter(n -> n.getVoice().equals("1")) // only primary voice
+                    .iterator();
             try {
-                //Arg
                 int op = nextNumber(notes, root, 2);
+                //Arg
                 if (Code.OpCode.hasArg(op)) {
                     int arg = nextNumber(notes, root);
                     code.add(op, arg);
