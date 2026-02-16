@@ -87,6 +87,15 @@ public class MusicCompiler {
         throw new InvalidTokenException("Invalid instruction, expected another note.");
     }
 
+    /**
+     * only pos numbers
+     *
+     * @param notes
+     * @param root
+     * @param digits
+     * @return
+     * @throws InvalidTokenException
+     */
     private static int nextNumber(Iterator<Note> notes, Step root, int digits) throws InvalidTokenException {
         int num = 0;
         for (int i = digits - 1; i >=0; i--) {
@@ -96,13 +105,27 @@ public class MusicCompiler {
         return num;
     }
 
+    /**
+     * Pos/neg numbers
+     *
+     * @param notes
+     * @param root
+     * @return
+     */
     private static int nextNumber(Iterator<Note> notes, Step root) {
         int num = 0;
+        boolean first = true;
+        int fac = 1;
         while (notes.hasNext()) {
+            Note note = notes.next();
             num *= BASE;
-            num += toDigit(notes.next().getPitch().getStep(), root);
+            num += toDigit(note.getPitch().getStep(), root);
+            if (first && note.getGrace() != null) {
+                fac = -1;
+            }
+            first = false;
         }
-        return num;
+        return num * fac;
     }
 
 }

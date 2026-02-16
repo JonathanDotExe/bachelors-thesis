@@ -44,6 +44,7 @@
                 <type>quarter</type>
             </note>
             <note>
+                <grace/>
                 <pitch>
                     <step>C</step>
                     <alter>1</alter>
