@@ -46,11 +46,7 @@ public class MusicCompiler {
                 //TODO altered key signatures?
             }
             //Notes => bytes
-            Iterator<Note> notes = measure.getNoteOrBackupOrForward().stream()
-                    .filter(o -> o instanceof Note)
-                    .map(o -> (Note) o)
-                    .filter(n -> n.getVoice().equals("1")) // only primary voice
-                    .iterator();
+            Iterator<Note> notes = new NoteIterator(measure);
             try {
                 int op = nextNumber(notes, root, 2);
                 //Arg
@@ -126,6 +122,53 @@ public class MusicCompiler {
             first = false;
         }
         return num * fac;
+    }
+
+    private static class NoteIterator implements Iterator<Note> {
+
+        private final Iterator<Note> base;
+        private Note next;
+
+        public NoteIterator(ScorePartwise.Part.Measure measure) {
+            base = measure.getNoteOrBackupOrForward().stream()
+                    .filter(o -> o instanceof Note)
+                    .map(o -> (Note) o)
+                    .filter(n -> n.getVoice().equals("1")) // only primary voice
+                    .iterator();
+            if (base.hasNext()) {
+                next = base.next();
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        @Override
+        public Note next() {
+            Note curr = next;
+            // Get next
+            if (base.hasNext()) {
+                next = base.next();
+            }
+            else {
+                next = null;
+            }
+            //Find top note in Chord
+            while (next != null && next.getChord() != null) {
+                if (NoteUtil.PITCH_COMPARATOR.compare(next.getPitch(), curr.getPitch()) > 0) {
+                    curr = next;
+                }
+                if (base.hasNext()) {
+                    next = base.next();
+                }
+                else {
+                    next = null;
+                }
+            }
+            return curr;
+        }
     }
 
 }
