@@ -5,7 +5,6 @@ import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
 import at.jku.ssw.hocheneder.musicesolang.music.NoteUtil;
 import org.audiveris.proxymusic.*;
 import org.audiveris.proxymusic.util.Marshalling;
-import org.w3c.dom.Attr;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,8 +76,11 @@ public class MusicCompiler {
     }
 
     private static int nextDigit(Iterator<Note> notes, Step root) throws InvalidTokenException {
-        if (notes.hasNext()) {
-            return toDigit(notes.next().getPitch().getStep(), root);
+        while (notes.hasNext()) {
+            Note next = notes.next();
+            if (next.getGrace() == null) {  // ignore grace notes
+                return toDigit(next.getPitch().getStep(), root);
+            }
         }
         throw new InvalidTokenException("Invalid instruction, expected another note.");
     }
@@ -114,10 +116,14 @@ public class MusicCompiler {
         int fac = 1;
         while (notes.hasNext()) {
             Note note = notes.next();
-            num *= BASE;
-            num += toDigit(note.getPitch().getStep(), root);
-            if (first && note.getGrace() != null) {
-                fac = -1;
+            if (note.getGrace() != null) { //ignore grace notes
+                if (first) {
+                    fac = -1;
+                }
+            }
+            else {
+                num *= BASE;
+                num += toDigit(note.getPitch().getStep(), root);
             }
             first = false;
         }
