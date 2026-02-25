@@ -1,9 +1,6 @@
 package at.jku.ssw.hocheneder.musicesolang.interpreter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 //Author: Christoph Pichler (abgewandelt)
 public class Code {
@@ -69,7 +66,8 @@ public class Code {
     }
 
     private final Vector<Integer> code = new Vector<>();
-    private final List<Label> labels = new ArrayList<>();
+    private final Map<Integer, Label> labels = new TreeMap<>();
+    private int nextLabel = 0;
 
     public void add(int... ops) {
         for (int op : ops) {
@@ -77,14 +75,31 @@ public class Code {
         }
     }
 
+    public int length() {
+        return code.size();
+    }
+
     public int[] getCode() {
-        labels.forEach(Label::fixup);
+        labels.values().forEach(Label::fixup);
         return code.stream().mapToInt(i -> i).toArray();
     }
 
     public Label createLabel() {
+        if (labels.containsKey(nextLabel)) {
+            return labels.get(nextLabel);
+        }
         Label l = new Label();
-        labels.add(l);
+        labels.put(nextLabel++, l);
+        return l;
+    }
+
+    public Label getLabel(int id) {
+        if (labels.containsKey(id)) {
+            return labels.get(id);
+        }
+
+        Label l = new Label();
+        labels.put(id, l);
         return l;
     }
 
@@ -114,24 +129,30 @@ public class Code {
     }
 
     public class Label {
-        private int sourceAddr = -1;
+        private List<Integer> sourceAddr = new ArrayList<>();
         private int targetAddr = -1;
 
         public void targetHere() {
             targetAddr = code.size();
         }
 
+        public void targetHere(int here) {
+            targetAddr = here;
+        }
+
         public void sourceHere() {
-            sourceAddr = code.size() + 1;
+            sourceAddr.add(code.size() + 1);
         }
 
         public void fixup() {
-            if (sourceAddr < 0 || targetAddr < 0) {
+            if (targetAddr < 0) {
                 throw new IllegalStateException("Label not resolved!");
             }
-            int prev = code.set(sourceAddr, targetAddr - sourceAddr - 1);
-            if (prev != 0) {
-                throw new IllegalStateException("Override a jump entry");
+            for (int src : sourceAddr) {
+                int prev = code.set(src, targetAddr - src - 1);
+                if (prev != 0) {
+                    throw new IllegalStateException("Override a jump entry");
+                }
             }
         }
     }

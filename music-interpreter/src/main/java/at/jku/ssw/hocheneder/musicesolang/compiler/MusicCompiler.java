@@ -8,9 +8,7 @@ import org.audiveris.proxymusic.util.Marshalling;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class MusicCompiler {
 
@@ -30,6 +28,8 @@ public class MusicCompiler {
         Step root = Step.C;
         Code code = new Code();
 
+        Set<Integer> labels = new TreeSet<>();
+
         //Measures = commands
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
             //Root
@@ -43,7 +43,9 @@ public class MusicCompiler {
                     root = NoteUtil.fifthsToMajorScaleRootIgnoreAlter(key.getFirst().getFifths().intValue());
                 }
                 //TODO altered key signatures?
+                //TODO what if multiple attributes?
             }
+            int startPc = code.length();
             //Notes => bytes
             Iterator<Note> notes = new NoteIterator(measure);
             try {
@@ -51,7 +53,13 @@ public class MusicCompiler {
                 //Arg
                 if (Code.OpCode.hasArg(op)) {
                     int arg = nextNumber(notes, root);
-                    code.add(op, arg);
+                    if (op == Code.OpCode.JMP_x) { //Jump source
+                        code.getLabel(arg).sourceHere();
+                        code.add(op, 0);
+                    }
+                    else {
+                        code.add(op, arg);
+                    }
                 } else if (Code.OpCode.isValidOpCode(op)){
                     code.add(op);
                 }
@@ -62,6 +70,29 @@ public class MusicCompiler {
             } catch (InvalidTokenException e) {
                 e.printStackTrace();
             }
+            int endPc = code.length();
+            //Labels
+            measure.getNoteOrBackupOrForward().stream()
+                    .filter(o -> o instanceof Barline)
+                    .map(o -> (Barline) o)
+                    .forEach(b -> {
+                        if (b.getBarStyle() != null &&
+                                b.getRepeat() == null &&
+                                (b.getBarStyle().getValue() == BarStyle.HEAVY_HEAVY || b.getBarStyle().getValue() == BarStyle.LIGHT_LIGHT)) {
+                            if (b.getLocation() == null || b.getLocation() == RightLeftMiddle.RIGHT) {
+                                labels.add(endPc);
+                            }
+                            else if (b.getLocation() == RightLeftMiddle.RIGHT) {
+                                labels.add(startPc);
+                            }
+                        }
+                    });
+        }
+
+        //Add labels
+        for (int l : labels) {
+            Code.Label label = code.createLabel();
+            label.targetHere(l);
         }
 
         return code;
@@ -139,7 +170,7 @@ public class MusicCompiler {
             base = measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Note)
                     .map(o -> (Note) o)
-                    .filter(n -> n.getVoice().equals("1")) // only primary voice
+                    .filter(n -> n.getVoice().equals("1") && n.getPitch() != null) // only primary voice
                     .iterator();
             if (base.hasNext()) {
                 next = base.next();

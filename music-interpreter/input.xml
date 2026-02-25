@@ -23,6 +23,9 @@
                     <line>2</line>
                 </clef>
             </attributes>
+            <barline position="left">
+                <bar-style>light-light</bar-style>
+            </barline>
             <note>
                 <pitch>
                     <step>C</step>
@@ -173,6 +176,68 @@
         <measure number="4">
             <note>
                 <pitch>
+                    <step>C</step>
+                    <alter>0</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>quarter</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>B</step>
+                    <alter>0</alter>
+                    <octave>3</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>quarter</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>C</step>
+                    <alter>0</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>C</step>
+                    <alter>1</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>D</step>
+                    <alter>0</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>D</step>
+                    <alter>1</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+        </measure>
+        <measure number="5">
+            <note>
+                <pitch>
                     <step>E</step>
                     <alter>0</alter>
                     <octave>4</octave>
@@ -191,6 +256,54 @@
                 <voice>1</voice>
                 <type>half</type>
                 <dot/>
+            </note>
+        </measure>
+        <measure number="6">
+            <note>
+                <pitch>
+                    <step>C</step>
+                    <alter>0</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>C</step>
+                    <alter>0</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>C</step>
+                    <alter>0</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+            <note>
+                <pitch>
+                    <step>C</step>
+                    <alter>0</alter>
+                    <octave>4</octave>
+                </pitch>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>eight</type>
+            </note>
+            <note>
+                <rest/>
+                <duration>1</duration>
+                <voice>1</voice>
+                <type>half</type>
             </note>
         </measure>
     </part>
