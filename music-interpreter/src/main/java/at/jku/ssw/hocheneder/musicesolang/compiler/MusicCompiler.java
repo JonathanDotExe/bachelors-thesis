@@ -82,7 +82,7 @@ public class MusicCompiler {
                             if (b.getLocation() == null || b.getLocation() == RightLeftMiddle.RIGHT) {
                                 labels.add(endPc);
                             }
-                            else if (b.getLocation() == RightLeftMiddle.RIGHT) {
+                            else if (b.getLocation() == RightLeftMiddle.LEFT) {
                                 labels.add(startPc);
                             }
                         }

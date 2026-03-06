@@ -23,7 +23,7 @@
                     <line>2</line>
                 </clef>
             </attributes>
-            <barline position="left">
+            <barline location="left">
                 <bar-style>light-light</bar-style>
             </barline>
             <note>

@@ -128,6 +128,17 @@ public class Code {
         return str.toString();
     }
 
+    public static String opToString(int[] code, int index) {
+        int op = code[index];
+        StringBuilder str = new StringBuilder();
+        str.append(OpCode.OPCODES.getOrDefault(op, "INVALID"));
+        if (OpCode.hasArg(op)) {
+            str.append(" ");
+            str.append(code[index + 1]);
+        }
+        return str.toString();
+    }
+
     public class Label {
         private List<Integer> sourceAddr = new ArrayList<>();
         private int targetAddr = -1;

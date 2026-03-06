@@ -1,15 +1,16 @@
 package at.jku.ssw.hocheneder.musicesolang.interpreter;
 
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
 
 import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OpCode.*;
 
 //Author: Christoph Pichler (abgewandelt)
 public class Interpreter {
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(Interpreter.class);
+
 	public static void interpret(int... code) {
 		Interpreter interpreter = new Interpreter(code);
 		try {
@@ -35,6 +36,7 @@ public class Interpreter {
 
 	private void run() throws IOException {
 		while (pc >= 0 && pc < code.length) {
+			log.debug(Code.opToString(code, pc));
 			switch (code[pc++]) {
 			case ADD:
 				push(pop() + pop());
@@ -94,7 +96,7 @@ public class Interpreter {
 			default:
 				throw new IllegalArgumentException("unknown opcode: " + code[pc]);
 			}
-			;
+			log.debug(eStackToString());
 		}
 	}
 
@@ -104,6 +106,16 @@ public class Interpreter {
 
 	private void push(int x) {
 		eStack[ePos++] = x;
+	}
+
+	private String eStackToString() {
+		StringBuilder str = new StringBuilder();
+		str.append("Expression Stack: ");
+		for (int i = 0; i < ePos; i++) {
+			str.append(eStack[i]);
+		}
+		str.append(System.lineSeparator());
+		return str.toString();
 	}
 
 	public static void main(String[] args) {
