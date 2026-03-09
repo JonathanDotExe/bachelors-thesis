@@ -23,6 +23,10 @@ public class MusicCompiler {
     }
 
     public Code compile() {
+        return compile(false);
+    }
+
+    public Code compile(boolean writeMeasure) {
         ScorePartwise.Part part = score.getPart().getFirst();
         //For now: always assume C major
         Step root = Step.C;
@@ -46,6 +50,10 @@ public class MusicCompiler {
                 //TODO what if multiple attributes?
             }
             int startPc = code.length();
+            //Encode measure
+            if (writeMeasure) {
+                code.add(-Integer.parseInt(measure.getNumber())); //FIXME Assume measure are int and start at 0
+            }
             //Notes => bytes
             Iterator<Note> notes = new NoteIterator(measure);
             try {

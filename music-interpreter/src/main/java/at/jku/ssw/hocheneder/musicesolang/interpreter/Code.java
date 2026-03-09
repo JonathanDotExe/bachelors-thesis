@@ -48,15 +48,11 @@ public class Code {
         }
 
         public static boolean hasArg(int opCode) {
-            switch (opCode) {
+            return switch (opCode) {
                 //Argument to the opcode
-                case CONST_x:
-                case JMP_x:
-                case LOAD_x:
-                case STORE_x:
-                    return true;
-            }
-            return false;
+                case CONST_x, JMP_x, LOAD_x, STORE_x -> true;
+                default -> false;
+            };
         }
 
         public static boolean isValidOpCode(int opCode) {

@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.IntConsumer;
 
 import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OpCode.*;
 
@@ -11,8 +12,8 @@ import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OpCode.*;
 public class Interpreter {
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(Interpreter.class);
 
-	public static void interpret(int... code) {
-		Interpreter interpreter = new Interpreter(code);
+	public static void interpret(IntConsumer measureCallback, int... code) {
+		Interpreter interpreter = new Interpreter(code, measureCallback);
 		try {
 			interpreter.run();
 		} catch (IOException e) {
@@ -20,14 +21,20 @@ public class Interpreter {
 		}
 	}
 
+	public static void interpret(int... code) {
+		interpret(i -> {}, code);
+	}
+
 	private final int[] code;
 	private int pc;
 	private final int[] eStack;
 	private int ePos;
 	private final int[] data;
+	private final IntConsumer measureCallback;
 
-	private Interpreter(int[] code) {
+	private Interpreter(int[] code, IntConsumer measureCallback) {
 		this.code = code;
+		this.measureCallback = measureCallback;
 		this.pc = 0;
 		this.eStack = new int[100];
 		this.ePos = 0;
@@ -36,67 +43,76 @@ public class Interpreter {
 
 	private void run() throws IOException {
 		while (pc >= 0 && pc < code.length) {
-			log.debug(Code.opToString(code, pc));
-			switch (code[pc++]) {
-			case ADD:
-				push(pop() + pop());
-				break;
-			case CONST_x:
-				push(code[pc++]);
-				break;
-			case DIV:
-				int denom = pop();
-				push(pop() / denom);
-				break;
-			case DUP:
-				int val = pop();
-				push(val);
-				push(val);
-				break;
-			case IS_NEG:
-				push(pop() < 0 ? 1 : 0);
-				break;
-			case JMP_x:
-				if (pop() != 0) {
-					pc += code[pc];
-				}
-				pc++;
-				break;
-			case LOAD_x:
-				push(data[code[pc++]]);
-				break;
-			case MUL:
-				push(pop() * pop());
-				break;
-			case NEG:
-				push(-pop());
-				break;
-			case NOT:
-				push(pop() == 0 ? 1 : 0);
-				break;
-			case POP:
-				pop();
-				break;
-			case REM:
-				denom = pop();
-				push(pop() % denom);
-				break;
-			case STORE_x:
-				data[code[pc++]] = pop();
-				break;
-			case OUT:
-				System.out.print((char) (pop()));
-				break;
-			case IN:
-				push(System.in.read());
-				break;
-			case OUT_INT:
-				System.out.print(pop());
-				break;
-			default:
-				throw new IllegalArgumentException("unknown opcode: " + code[pc]);
+			if (code[pc] < 0) {
+				//Measure
+				int measure = -code[pc++];
+                log.debug("Measure {}", measure);
+				measureCallback.accept(measure);
 			}
-			log.debug(eStackToString());
+			else {
+				//Opcode
+				log.debug(Code.opToString(code, pc));
+				switch (code[pc++]) {
+					case ADD:
+						push(pop() + pop());
+						break;
+					case CONST_x:
+						push(code[pc++]);
+						break;
+					case DIV:
+						int denom = pop();
+						push(pop() / denom);
+						break;
+					case DUP:
+						int val = pop();
+						push(val);
+						push(val);
+						break;
+					case IS_NEG:
+						push(pop() < 0 ? 1 : 0);
+						break;
+					case JMP_x:
+						if (pop() != 0) {
+							pc += code[pc];
+						}
+						pc++;
+						break;
+					case LOAD_x:
+						push(data[code[pc++]]);
+						break;
+					case MUL:
+						push(pop() * pop());
+						break;
+					case NEG:
+						push(-pop());
+						break;
+					case NOT:
+						push(pop() == 0 ? 1 : 0);
+						break;
+					case POP:
+						pop();
+						break;
+					case REM:
+						denom = pop();
+						push(pop() % denom);
+						break;
+					case STORE_x:
+						data[code[pc++]] = pop();
+						break;
+					case OUT:
+						System.out.print((char) (pop()));
+						break;
+					case IN:
+						push(System.in.read());
+						break;
+					case OUT_INT:
+						System.out.print(pop());
+						break;
+					default:
+						throw new IllegalArgumentException("unknown opcode: " + code[pc]);
+				}
+				log.debug(eStackToString());
+			}
 		}
 	}
 
