@@ -1,8 +1,14 @@
 package at.jku.ssw.hocheneder.musicesolang.interpreter;
 
+import at.jku.ssw.hocheneder.musicesolang.generator.MusicCodeGenerator;
+import org.audiveris.proxymusic.ScorePartwise;
+import org.audiveris.proxymusic.util.Marshalling;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.function.IntConsumer;
 
@@ -134,7 +140,7 @@ public class Interpreter {
 		return str.toString();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException, Marshalling.MarshallingException {
 		/* the current program prints all divisors of N */
 		final int N = 60;
 		Code code = new Code();
@@ -162,6 +168,12 @@ public class Interpreter {
 		final int[] resolvedCode = code.getCode();
 		System.err.println("Code: " + Arrays.toString(resolvedCode));
 		interpret(resolvedCode);
+
+		// Compile code
+		ScorePartwise score = new MusicCodeGenerator().generate(resolvedCode);
+		try (OutputStream out = new FileOutputStream("output.xml")) {
+			Marshalling.marshal(score, out, false, 0);
+		}
 	}
 
 }

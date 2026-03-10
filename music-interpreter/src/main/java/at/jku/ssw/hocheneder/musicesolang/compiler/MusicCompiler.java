@@ -27,7 +27,7 @@ public class MusicCompiler {
     }
 
     public Code compile(boolean writeMeasure) {
-        ScorePartwise.Part part = score.getPart().getFirst();
+        ScorePartwise.Part part = score.getPart().getFirst(); //FIXME first or first id?
         //For now: always assume C major
         Step root = Step.C;
         Code code = new Code();
@@ -106,12 +106,35 @@ public class MusicCompiler {
         return code;
     }
 
-    private static int toDigit(Step note, Step root) {
+    public static int toDigit(Step note, Step root) {
         int diff = note.ordinal() - root.ordinal();
         if (diff < 0) {
             diff += BASE;
         }
         return diff;
+    }
+
+    public static Step[] toSteps(Step root, int op, int arg) {
+        List<Step> steps = new LinkedList<>();
+
+        //Opcode
+        steps.add(byteToStep(root, op / BASE));
+        steps.add(byteToStep(root, op % BASE));
+        //Arg
+        while (arg > 0) {
+            steps.add(2, byteToStep(root, arg % BASE));
+            arg /= BASE;
+        }
+
+        return steps.toArray(Step[]::new);
+    }
+
+    private static Step byteToStep(Step root, int b) {
+        int diff = b - root.ordinal();
+        if (diff < 0) {
+            diff += BASE;
+        }
+        return Step.values()[diff];
     }
 
     private static int nextDigit(Iterator<Note> notes, Step root) throws InvalidTokenException {
