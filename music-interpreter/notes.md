@@ -43,12 +43,48 @@ Example encoding:
 
 
 
-First language:
- - Use 7 scale degrees to denote 0 - 6
- - Each measure is one instruction
- - 2 7ths - operation
- - 8 7ths - value => 7^8 = 5764801
- - 
+Current progress 13.03.2026
+- Interpreter
+  - interprets our bytecode
+  - negative opcodes mark measure ids and are ignored
+  - a measure callback is called so the current measure can be tracked during execution
+    - e.g. for playing back the measures
+    - TODO check if jumps are correctly placed so that the jumps jump to the position before the measures
+- Music compiler
+  - Transforms music xml into bytecode of our interpreter language
+  - Language definition
+    - Use 7 scale degrees to denote 0 - 6
+      - key signature marking are analized to determine the root
+      - sharps and flats are ignored => more musical flexibility
+    - Each measure is one instruction
+    - 2 7-bytes - operation
+      - empty bars/only one note => ignored
+    - arbitrary amount of 7-bytes afterwards => argument, flexible interger size
+      - if no argument is needed, rest is ignored
+      - grace notes at the start of a number => negative number, otherwise ignored
+    - only primary part and primary voice are considered
+    - in the case of chords in a single voice, the to note (first highest line position, then true pitch after alterations if line is the same)
+    - rests are ignored
+    - double barlines (heavy-heavy or light-light) denote labels
+      - all labels are indexed by ascending ids starting at 0
+      - numerical argument for JMP denotes the label index
+- Music decompiler
+  - Transforms bytecode into music xml
+  - all in c major
+  - one measure per instruction
+  - all eight notes
+    - TODO: dynamically scale note values according to length of numbers
+  - jumps are converted to barline labels correctly
+  - TODO: fill up empty space with rests each bar
+  - TODO: check format validity (currently can't open in musescore but the compiler correctly recompiles it)
+
+Future TODOs:
+- check a lot of assumptions against music xml standard
+- write a lot of test programs
+- => use test results to find more musically interesting opcodes
+  - maybe modulo assignment of opcodes?
+- write a midi player and use it to play the measures
+ 
 
 
 
