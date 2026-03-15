@@ -137,6 +137,9 @@
         </measure>
         <!--=======================================================-->
         <measure number="5">
+            <barline location="left">
+                <bar-style>heavy-heavy</bar-style>
+            </barline>
             <note>
                 <pitch>
                     <step>C</step>
@@ -271,16 +274,7 @@
             </note>
             <note>
                 <pitch>
-                    <step>F</step>
-                    <octave>0</octave>
-                </pitch>
-                <duration>1</duration>
-                <voice>1</voice>
-                <type>eigth</type>
-            </note>
-            <note>
-                <pitch>
-                    <step>F</step>
+                    <step>E</step>
                     <octave>0</octave>
                 </pitch>
                 <duration>1</duration>
@@ -382,7 +376,7 @@
             </note>
             <note>
                 <pitch>
-                    <step>B</step>
+                    <step>D</step>
                     <octave>0</octave>
                 </pitch>
                 <duration>1</duration>
@@ -503,6 +497,9 @@
         </measure>
         <!--=======================================================-->
         <measure number="19">
+            <barline location="left">
+                <bar-style>heavy-heavy</bar-style>
+            </barline>
             <note>
                 <pitch>
                     <step>C</step>
@@ -662,6 +659,12 @@
                 <voice>1</voice>
                 <type>eigth</type>
             </note>
+        </measure>
+        <!--=======================================================-->
+        <measure number="25">
+            <barline location="left">
+                <bar-style>heavy-heavy</bar-style>
+            </barline>
         </measure>
     </part>
 </score-partwise>

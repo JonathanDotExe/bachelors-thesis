@@ -12,7 +12,7 @@ import java.util.*;
 
 public class MusicCompiler {
 
-    private static final int BASE = Step.values().length;
+    public static final int BASE = Step.values().length;
 
     private final ScorePartwise score;
 
@@ -112,29 +112,6 @@ public class MusicCompiler {
             diff += BASE;
         }
         return diff;
-    }
-
-    public static Step[] toSteps(Step root, int op, int arg) {
-        List<Step> steps = new LinkedList<>();
-
-        //Opcode
-        steps.add(byteToStep(root, op / BASE));
-        steps.add(byteToStep(root, op % BASE));
-        //Arg
-        while (arg > 0) {
-            steps.add(2, byteToStep(root, arg % BASE));
-            arg /= BASE;
-        }
-
-        return steps.toArray(Step[]::new);
-    }
-
-    private static Step byteToStep(Step root, int b) {
-        int diff = b + root.ordinal();
-        if (diff >= BASE) {
-            diff -= BASE;
-        }
-        return Step.values()[diff];
     }
 
     private static int nextDigit(Iterator<Note> notes, Step root) throws InvalidTokenException {

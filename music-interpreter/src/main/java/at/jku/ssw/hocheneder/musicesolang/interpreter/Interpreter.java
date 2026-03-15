@@ -1,11 +1,10 @@
 package at.jku.ssw.hocheneder.musicesolang.interpreter;
 
-import at.jku.ssw.hocheneder.musicesolang.generator.MusicCodeGenerator;
+import at.jku.ssw.hocheneder.musicesolang.decompiler.MusicDecompiler;
 import org.audiveris.proxymusic.ScorePartwise;
 import org.audiveris.proxymusic.util.Marshalling;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -170,7 +169,7 @@ public class Interpreter {
 		interpret(resolvedCode);
 
 		// Compile code
-		ScorePartwise score = new MusicCodeGenerator().generate(resolvedCode);
+		ScorePartwise score = new MusicDecompiler(resolvedCode).generate();
 		try (OutputStream out = new FileOutputStream("output.xml")) {
 			Marshalling.marshal(score, out, false, 4);
 		}
