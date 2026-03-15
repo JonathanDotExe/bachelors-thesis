@@ -82,7 +82,7 @@ public class Code {
 
     public Label createLabel() {
         if (labels.containsKey(nextLabel)) {
-            return labels.get(nextLabel);
+            return labels.get(nextLabel++);
         }
         Label l = new Label();
         labels.put(nextLabel++, l);

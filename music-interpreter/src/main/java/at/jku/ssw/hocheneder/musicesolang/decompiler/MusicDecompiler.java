@@ -139,7 +139,7 @@ public class MusicDecompiler {
 
         //Arg
         while (arg > 0) {
-            steps.add(0, byteToStep(root, arg % BASE));
+            steps.addFirst(byteToStep(root, arg % BASE));
             arg /= BASE;
         }
 
