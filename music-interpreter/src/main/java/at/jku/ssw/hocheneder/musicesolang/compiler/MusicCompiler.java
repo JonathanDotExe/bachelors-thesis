@@ -52,7 +52,7 @@ public class MusicCompiler {
             int startPc = code.length();
             //Encode measure
             if (writeMeasure) {
-                code.add(-Integer.parseInt(measure.getNumber())); //FIXME Assume measure are int and start at 0
+                code.add(-Integer.parseInt(measure.getNumber())); //FIXME Assume measures are int and start at 0
             }
             //Notes => bytes
             Iterator<Note> notes = new NoteIterator(measure);
@@ -130,9 +130,9 @@ public class MusicCompiler {
     }
 
     private static Step byteToStep(Step root, int b) {
-        int diff = b - root.ordinal();
-        if (diff < 0) {
-            diff += BASE;
+        int diff = b + root.ordinal();
+        if (diff >= BASE) {
+            diff -= BASE;
         }
         return Step.values()[diff];
     }

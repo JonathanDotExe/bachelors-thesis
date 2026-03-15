@@ -3,7 +3,8 @@ package at.jku.ssw.hocheneder.musicesolang.generator;
 import at.jku.ssw.hocheneder.musicesolang.compiler.MusicCompiler;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
 import org.audiveris.proxymusic.*;
-import org.audiveris.proxymusic.opus.Score;
+
+import java.math.BigDecimal;
 
 public class MusicCodeGenerator {
 
@@ -11,8 +12,15 @@ public class MusicCodeGenerator {
             Step root = Step.C;
 
             ScorePartwise score = new ScorePartwise();
+            //Partlist
+            ScorePart scorePart = new ScorePart();
+            //scorePart.setId("P1");
+            score.setPartList(new PartList());
+            score.getPartList().getPartGroupOrScorePart().add(scorePart);
+
+            //Part
             ScorePartwise.Part part = new ScorePartwise.Part();
-            part.setId("P1");
+            //part.setId("P1");
 
             //Measures
             int count = 1;
@@ -40,6 +48,8 @@ public class MusicCodeGenerator {
                         type.setValue("eigth");
                         note.setType(type); //TODO dynamically scale size
 
+                        note.setVoice("1");
+                        note.setDuration(BigDecimal.ONE);
 
                         measure.getNoteOrBackupOrForward().add(note);
                         // TODO generate label jumps

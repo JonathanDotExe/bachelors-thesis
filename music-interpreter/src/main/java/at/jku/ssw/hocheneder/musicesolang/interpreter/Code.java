@@ -110,13 +110,14 @@ public class Code {
                 arg = false;
             }
             else {
-                str.append(OpCode.OPCODES.getOrDefault(op, "INVALID"));
-                if (OpCode.hasArg(op)) {
-                    str.append(" ");
-                    arg = true;
-                }
-                else {
-                    str.append(System.lineSeparator());
+                if (op >= 0 ) { //Ignore measure marking
+                    str.append(OpCode.OPCODES.getOrDefault(op, "INVALID"));
+                    if (OpCode.hasArg(op)) {
+                        str.append(" ");
+                        arg = true;
+                    } else {
+                        str.append(System.lineSeparator());
+                    }
                 }
             }
         }

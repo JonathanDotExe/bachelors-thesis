@@ -172,7 +172,7 @@ public class Interpreter {
 		// Compile code
 		ScorePartwise score = new MusicCodeGenerator().generate(resolvedCode);
 		try (OutputStream out = new FileOutputStream("output.xml")) {
-			Marshalling.marshal(score, out, false, 0);
+			Marshalling.marshal(score, out, false, 4);
 		}
 	}
 
