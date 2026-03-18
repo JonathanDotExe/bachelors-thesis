@@ -42,7 +42,8 @@ public class MusicDecompiler {
         this.code = code;
     }
 
-    public ScorePartwise generate() {
+    public ScorePartwise generate(boolean randomize) {
+        Random random = new Random();
         Step root = Step.C;
 
         ScorePartwise score = new ScorePartwise();
@@ -81,6 +82,10 @@ public class MusicDecompiler {
                     DecompilerLabel label = labels.computeIfAbsent(arg + i + 1, c -> new DecompilerLabel());
                     label.sourceHere(measure);
                     arg = 0; //Dont write argument
+                }
+
+                if (randomize) {
+                    op *= random.nextInt(3) + 1;
                 }
 
                 Step[] steps = toSteps(root, op, arg);
@@ -156,7 +161,7 @@ public class MusicDecompiler {
             }
             else {
                 int subdivision = NoteUtil.findNextPowerOf2(amount);
-                
+
                 if (!NOTE_VALUES.containsKey(subdivision)) {
                     throw new IllegalStateException("Invalid amount of subdivisions " + subdivision);
                 }

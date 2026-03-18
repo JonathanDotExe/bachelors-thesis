@@ -169,7 +169,7 @@ public class Interpreter {
 		interpret(resolvedCode);
 
 		// Compile code
-		ScorePartwise score = new MusicDecompiler(resolvedCode).generate();
+		ScorePartwise score = new MusicDecompiler(resolvedCode).generate(true);
 		try (OutputStream out = new FileOutputStream("output.xml")) {
 			Marshalling.marshal(score, out, false, 4);
 		}

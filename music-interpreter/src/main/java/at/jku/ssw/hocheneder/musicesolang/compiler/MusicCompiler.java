@@ -57,7 +57,7 @@ public class MusicCompiler {
             //Notes => bytes
             Iterator<Note> notes = new NoteIterator(measure);
             try {
-                int op = nextNumber(notes, root, 2);
+                int op = nextNumber(notes, root, 2) % Code.OpCode.OPCODES.size();
                 //Arg
                 if (Code.OpCode.hasArg(op)) {
                     int arg = nextNumber(notes, root);
