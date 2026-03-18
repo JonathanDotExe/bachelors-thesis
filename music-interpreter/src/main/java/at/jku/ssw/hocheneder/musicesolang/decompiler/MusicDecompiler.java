@@ -2,10 +2,16 @@ package at.jku.ssw.hocheneder.musicesolang.decompiler;
 
 import at.jku.ssw.hocheneder.musicesolang.compiler.MusicCompiler;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
+import at.jku.ssw.hocheneder.musicesolang.music.NoteUtil;
+import jakarta.xml.bind.JAXBElement;
 import org.audiveris.proxymusic.*;
 
+import javax.xml.namespace.QName;
+import java.lang.String;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static at.jku.ssw.hocheneder.musicesolang.compiler.MusicCompiler.BASE;
 
@@ -15,6 +21,21 @@ public class MusicDecompiler {
     private int count = 1;
     private Map<Integer, DecompilerLabel> labels = new TreeMap<>();
     private Map<Integer, ScorePartwise.Part.Measure> measures = new TreeMap<>();
+
+
+    public static final Map<Integer, String> NOTE_VALUES = Map.ofEntries(
+            Map.entry(1, "whole"),
+            Map.entry(2, "half"),
+            Map.entry(4, "quarter"),
+            Map.entry(8, "eighth"),
+            Map.entry(16, "16th"),
+            Map.entry(32, "32nd"),
+            Map.entry(64, "64th"),
+            Map.entry(128, "128th"),
+            Map.entry(256, "256th"),
+            Map.entry(512, "512th"),
+            Map.entry(1024, "1024th")
+    );
 
 
     public MusicDecompiler(int[] code) {
@@ -27,13 +48,16 @@ public class MusicDecompiler {
         ScorePartwise score = new ScorePartwise();
         //Partlist
         ScorePart scorePart = new ScorePart();
-        //scorePart.setId("P1");
+        scorePart.setId("P1");
+        PartName name = new PartName();
+        name.setValue("P1");
+        scorePart.setPartName(name);
         score.setPartList(new PartList());
         score.getPartList().getPartGroupOrScorePart().add(scorePart);
 
         //Part
         ScorePartwise.Part part = new ScorePartwise.Part();
-        //part.setId("P1");
+        part.setId(scorePart);
 
         //Measures
         for (int i = 0; i < code.length; i++) {
@@ -67,10 +91,11 @@ public class MusicDecompiler {
                     Pitch pitch = new Pitch();
                     pitch.setStep(step);
                     note.setPitch(pitch);
+                    pitch.setOctave(4);
 
                     NoteType type = new NoteType();
-                    type.setValue("eigth");
-                    note.setType(type); //TODO dynamically scale size
+                    type.setValue("eighth");
+                    note.setType(type);
 
                     note.setVoice("1");
                     note.setDuration(BigDecimal.ONE);
@@ -89,7 +114,6 @@ public class MusicDecompiler {
         bufferMeasure.setNumber(count++ + "");
         part.getMeasure().add(bufferMeasure);
 
-
         //Resolve labels
         int id = 0;
         for (Map.Entry<Integer, DecompilerLabel> entry : labels.entrySet()) {
@@ -102,7 +126,7 @@ public class MusicDecompiler {
                 barline.setBarStyle(barStyleColor);
                 barline.setLocation(RightLeftMiddle.LEFT);
 
-                measure.getNoteOrBackupOrForward().add(0, barline);
+                measure.getNoteOrBackupOrForward().addFirst(barline);
 
                 //Fixup
                 entry.getValue().fixup(root, id);
@@ -113,10 +137,92 @@ public class MusicDecompiler {
             id++;
         }
 
+        //Normalize note values
+        for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
+            int amount = findNoteCount(measure);
+            if (amount == 0) {
+                // Insert rest
+                Note note = new Note();
+                note.setRest(new Rest());
+
+                NoteType type = new NoteType();
+                type.setValue("whole");
+                note.setType(type);
+
+                note.setVoice("1");
+                note.setDuration(BigDecimal.ONE);
+
+                measure.getNoteOrBackupOrForward().add(note);
+            }
+            else {
+                int subdivision = NoteUtil.findNextPowerOf2(amount);
+                
+                if (!NOTE_VALUES.containsKey(subdivision)) {
+                    throw new IllegalStateException("Invalid amount of subdivisions " + subdivision);
+                }
+
+                //Set subdivisions
+                Stream<Note> notes = measure.getNoteOrBackupOrForward().stream().filter(o -> o instanceof Note)
+                        .map(o -> (Note) o)
+                        .filter(n -> n.getVoice().equals("1") && n.getPitch() != null);
+
+                notes.forEach(n -> {
+                    NoteType type = new NoteType();
+                    type.setValue(NOTE_VALUES.get(subdivision));
+                    n.setType(type);
+                });
+
+                //Breaks
+                int stepsLeft = subdivision - amount;
+                int index = measure.getNoteOrBackupOrForward().size();
+                while (stepsLeft > 0) {
+                    int nextSub = NoteUtil.findPrevPowerOf2(stepsLeft);
+                    int value = subdivision / nextSub;
+                    if (!NOTE_VALUES.containsKey(value)) {
+                        throw new IllegalStateException("Invalid amount of subdivisions " + subdivision);
+                    }
+
+                    // Insert rest
+                    Note note = new Note();
+                    note.setRest(new Rest());
+
+                    NoteType type = new NoteType();
+                    type.setValue(NOTE_VALUES.get(value));
+                    note.setType(type);
+
+                    note.setVoice("1");
+                    note.setDuration(BigDecimal.ONE);
+
+                    measure.getNoteOrBackupOrForward().add(index, note); // => smallest rest first
+
+                    stepsLeft -= nextSub;
+                }
+            }
+        }
+
+        //Attributes
+        Attributes attributes = new Attributes();
+        Key key = new Key();
+        key.setFifths(BigInteger.ZERO);
+        attributes.getKey().add(key);
+
+        Time time = new Time();
+        time.getTimeSignature().add(new JAXBElement<>(new QName("beats"), java.lang.String.class, "4"));
+        time.getTimeSignature().add(new JAXBElement<>(new QName("beat-type"), java.lang.String.class, "4"));
+        attributes.getTime().add(time);
+
+        part.getMeasure().getFirst().getNoteOrBackupOrForward().addFirst(attributes);
+
 
         score.getPart().add(part);
 
         return score;
+    }
+
+    private int findNoteCount(ScorePartwise.Part.Measure measure) {
+        return (int) measure.getNoteOrBackupOrForward().stream().filter(o -> o instanceof Note)
+                .map(o -> (Note) o)
+                .filter(n -> n.getVoice().equals("1") && n.getPitch() != null && n.getChord() == null).count(); // only primary voice
     }
 
     private static Step[] toSteps(Step root, int op, int arg) {
@@ -171,10 +277,11 @@ public class MusicDecompiler {
                     Pitch pitch = new Pitch();
                     pitch.setStep(step);
                     note.setPitch(pitch);
+                    pitch.setOctave(4);
 
                     NoteType type = new NoteType();
-                    type.setValue("eigth");
-                    note.setType(type); //TODO dynamically scale size
+                    type.setValue("eighth");
+                    note.setType(type);
 
                     note.setVoice("1");
                     note.setDuration(BigDecimal.ONE);

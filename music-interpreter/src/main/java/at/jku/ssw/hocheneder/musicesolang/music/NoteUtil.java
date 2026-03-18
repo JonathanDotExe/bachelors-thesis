@@ -1,5 +1,6 @@
 package at.jku.ssw.hocheneder.musicesolang.music;
 
+import at.jku.ssw.hocheneder.musicesolang.interpreter.Interpreter;
 import org.audiveris.proxymusic.Pitch;
 import org.audiveris.proxymusic.Step;
 
@@ -63,4 +64,14 @@ public class NoteUtil {
         }
         return 0;
     }
+
+    public static int findPrevPowerOf2(int num) {
+        return 1 << (32 - Integer.numberOfLeadingZeros(num) - 1);
+    }
+
+    public static int findNextPowerOf2(int num) {
+        int prev = findPrevPowerOf2(num);
+        return num == prev ? num : prev * 2;
+    }
+
 }

@@ -83,6 +83,7 @@ Future TODOs:
 - write a lot of test programs
 - => use test results to find more musically interesting opcodes
   - maybe modulo assignment of opcodes?
+  - other idea first note of bar denotes reference point not key signature?
 - write a midi player and use it to play the measures
  
 
