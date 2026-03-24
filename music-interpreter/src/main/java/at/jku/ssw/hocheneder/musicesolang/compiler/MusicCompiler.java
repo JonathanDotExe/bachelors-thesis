@@ -23,10 +23,10 @@ public class MusicCompiler {
     }
 
     public Code compile() {
-        return compile(false);
+        return compile(false, null);
     }
 
-    public Code compile(boolean writeMeasure) {
+    public Code compile(boolean writeMeasure, MeasureStore store) {
         ScorePartwise.Part part = score.getPart().getFirst(); //FIXME first or first id?
         //For now: always assume C major
         Step root = Step.C;
@@ -35,6 +35,7 @@ public class MusicCompiler {
         Set<Integer> labels = new TreeSet<>();
 
         //Measures = commands
+        int measureId = 1;
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
             //Root
             Optional<Attributes> attr = measure.getNoteOrBackupOrForward().stream()
@@ -52,7 +53,10 @@ public class MusicCompiler {
             int startPc = code.length();
             //Encode measure
             if (writeMeasure) {
-                code.add(-Integer.parseInt(measure.getNumber())); //FIXME Assume measures are int and start at 0
+                code.add(-measureId);
+            }
+            if (store != null) {
+                store.addMeasure(measureId, measure);
             }
             //Notes => bytes
             Iterator<Note> notes = new NoteIterator(measure);
@@ -95,6 +99,8 @@ public class MusicCompiler {
                             }
                         }
                     });
+
+            measureId++;
         }
 
         //Add labels

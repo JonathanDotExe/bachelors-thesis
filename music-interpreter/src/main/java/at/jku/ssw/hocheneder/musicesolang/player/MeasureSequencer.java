@@ -1,5 +1,6 @@
 package at.jku.ssw.hocheneder.musicesolang.player;
 
+import at.jku.ssw.hocheneder.musicesolang.compiler.MeasureStore;
 import org.audiveris.proxymusic.ScorePartwise;
 
 import javax.sound.midi.*;
@@ -9,9 +10,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
-public class MeasureSequencer implements IntConsumer, AutoCloseable {
+public class MeasureSequencer implements IntConsumer, AutoCloseable, MeasureStore {
 
-    private Map<Integer, MeasureSequence> measures = new HashMap<>();
+    private final Map<Integer, MeasureSequence> measures = new HashMap<>();
     private Synthesizer synth;
     private Sequencer sequencer;
 
@@ -36,14 +37,15 @@ public class MeasureSequencer implements IntConsumer, AutoCloseable {
             throw new IllegalStateException("Already initialized.");
         }
 
-        Synthesizer synth = MidiSystem.getSynthesizer();
+        synth = MidiSystem.getSynthesizer();
         synth.open();
 
-        Sequencer sequencer = MidiSystem.getSequencer();
+        sequencer = MidiSystem.getSequencer();
         sequencer.open();
         sequencer.getTransmitter().setReceiver(synth.getReceiver());
     }
 
+    @Override
     public void addMeasure(int id, ScorePartwise.Part.Measure measure) {
         if (sequencer != null) {
             throw new IllegalStateException("Already initialized. Measures can't be added anymore.");

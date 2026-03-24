@@ -17,13 +17,14 @@ public class MeasureSequence {
 
     public void play(Sequencer sequencer) throws InvalidMidiDataException {
         sequencer.setSequence(sequence);
+        sequencer.setTickPosition(0);
         sequencer.start();
 
         while (sequencer.isRunning()) { //await end
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                //Ingore
+                //Ignore
             }
         }
     }

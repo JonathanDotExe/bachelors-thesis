@@ -35,7 +35,8 @@ public class NoteUtil {
 
 
     public static int pitchToMidiNote(Pitch p) {
-        return 60 + 12 * (p.getOctave() - 4) + toPitchOct(p.getStep()) + p.getAlter().intValue(); //TODO consider decimal
+        int alter = p.getAlter() != null ? p.getAlter().intValue() : 0;
+        return 60 + 12 * (p.getOctave() - 4) + toPitchOct(p.getStep()) + alter; //TODO consider decimal
     }
 
     public static int toPitchOct(Step step) {
