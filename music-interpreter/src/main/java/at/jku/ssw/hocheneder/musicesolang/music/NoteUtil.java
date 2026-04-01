@@ -5,8 +5,38 @@ import org.audiveris.proxymusic.Pitch;
 import org.audiveris.proxymusic.Step;
 
 import java.util.Comparator;
+import java.util.Map;
 
 public class NoteUtil {
+
+
+    public static final Map<Integer, String> NOTE_VALUES = Map.ofEntries(
+            Map.entry(1, "whole"),
+            Map.entry(2, "half"),
+            Map.entry(4, "quarter"),
+            Map.entry(8, "eighth"),
+            Map.entry(16, "16th"),
+            Map.entry(32, "32nd"),
+            Map.entry(64, "64th"),
+            Map.entry(128, "128th"),
+            Map.entry(256, "256th"),
+            Map.entry(512, "512th"),
+            Map.entry(1024, "1024th")
+    );
+
+    public static final Map<String, Integer> REVERSE_NOTE_VALUES = Map.ofEntries(
+            Map.entry("whole", 1),
+            Map.entry("half", 2),
+            Map.entry("quarter", 4),
+            Map.entry("eighth", 8),
+            Map.entry("16th", 16),
+            Map.entry("32nd", 32),
+            Map.entry("64th", 64),
+            Map.entry("128th", 128),
+            Map.entry("256th", 256),
+            Map.entry("512th", 512),
+            Map.entry("1024th", 1024)
+    );
 
     public static final Comparator<Pitch> PITCH_COMPARATOR = Comparator
             .comparing(NoteUtil::pitchToMidiNote)

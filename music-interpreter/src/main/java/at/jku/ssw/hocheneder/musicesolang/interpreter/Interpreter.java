@@ -26,7 +26,7 @@ public class Interpreter {
 		}
 	}
 
-	public static void interpret(int... code) {
+	public static void   interpret(int... code) {
 		interpret(i -> {}, code);
 	}
 
