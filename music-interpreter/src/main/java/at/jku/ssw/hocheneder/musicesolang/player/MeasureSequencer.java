@@ -4,10 +4,8 @@ import at.jku.ssw.hocheneder.musicesolang.compiler.MeasureStore;
 import org.audiveris.proxymusic.ScorePartwise;
 
 import javax.sound.midi.*;
-import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 public class MeasureSequencer implements IntConsumer, AutoCloseable, MeasureStore {

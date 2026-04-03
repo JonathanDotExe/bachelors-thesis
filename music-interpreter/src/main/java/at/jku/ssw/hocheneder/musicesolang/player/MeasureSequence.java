@@ -6,7 +6,9 @@ import org.audiveris.proxymusic.NoteType;
 import org.audiveris.proxymusic.ScorePartwise;
 
 import javax.sound.midi.*;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class MeasureSequence {
 
@@ -32,24 +34,34 @@ public class MeasureSequence {
     }
 
     private static Sequence measureToSequence(ScorePartwise.Part.Measure measure) {
+        // FIXME: consider staffs
         try {
             Sequence sequence = new Sequence(Sequence.PPQ, 1024 / 4);
-            Track track = sequence.createTrack();
-            int ticks = 0;
-            int lastDur = 0;
+            // Track
+            Map<String, VoiceTrack> tracks = new HashMap<>();
+            measure.getNoteOrBackupOrForward().stream()
+                    .filter(o -> o instanceof Note)
+                    .map(o -> ((Note) o).getVoice())
+                    .distinct()
+                    .forEach(v -> {
+                        tracks.put(v, new VoiceTrack(sequence.createTrack()));
+                    });
+
+            // Iterate notes
             Iterator<Note> iter = measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Note)
                     .map(o -> (Note) o)
-                    .filter(n -> n.getVoice().equals("1")) // FIXME: consider multiple voices and staffs);
                     .iterator();
+
             while (iter.hasNext()) {
                 Note n = iter.next();
+                VoiceTrack track = tracks.get(n.getVoice());
                 if (n.getChord() == null) {
-                    ticks += lastDur;
+                    track.ticks += track.lastDur;
                 }
                 NoteType type = n.getType();
                 int noteValue = type != null ? NoteUtil.REVERSE_NOTE_VALUES.getOrDefault(type.getValue(), 4) : 4;
-                lastDur = 1024 / noteValue;
+                track.lastDur = 1024 / noteValue;
                 if (n.getPitch() != null) { //Note
                     int pitch = NoteUtil.pitchToMidiNote(n.getPitch());
                     ShortMessage on = new ShortMessage();
@@ -57,19 +69,33 @@ public class MeasureSequence {
                     ShortMessage off = new ShortMessage();
                     off.setMessage(ShortMessage.NOTE_OFF, 0, pitch, 127);
 
-                    track.add(new MidiEvent(on, ticks));
-                    track.add(new MidiEvent(off, ticks + lastDur));
+                    track.track.add(new MidiEvent(on, track.ticks));
+                    track.track.add(new MidiEvent(off, track.ticks + track.lastDur));
                 }
             }
             //Place CC at end so it finishes bar with rests
-            ticks += lastDur;
-            ShortMessage cc = new ShortMessage();
-            cc.setMessage(ShortMessage.CONTROL_CHANGE, 0, 1, 127);
-            track.add(new MidiEvent(cc, ticks));
+            for (VoiceTrack track : tracks.values()) {
+                track.ticks += track.lastDur;
+                ShortMessage cc = new ShortMessage();
+                cc.setMessage(ShortMessage.CONTROL_CHANGE, 0, 1, 127);
+                track.track.add(new MidiEvent(cc, track.ticks));
+            }
             return sequence;
         } catch (InvalidMidiDataException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private static class VoiceTrack {
+
+        public int ticks = 0;
+        public int lastDur = 0;
+        public final Track track;
+
+        private VoiceTrack(Track track) {
+            this.track = track;
+        }
+    }
+
 
 }
