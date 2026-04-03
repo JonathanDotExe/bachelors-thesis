@@ -8,6 +8,7 @@ import org.audiveris.proxymusic.util.Marshalling;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.*;
 
 public class MusicCompiler {
@@ -184,7 +185,7 @@ public class MusicCompiler {
             base = measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Note)
                     .map(o -> (Note) o)
-                    .filter(n -> n.getVoice().equals("1") && n.getPitch() != null) // only primary voice
+                    .filter(n -> "1".equals(n.getVoice()) && BigInteger.ONE.equals(n.getStaff()) && n.getPitch() != null) // only primary voice
                     .iterator();
             if (base.hasNext()) {
                 next = base.next();

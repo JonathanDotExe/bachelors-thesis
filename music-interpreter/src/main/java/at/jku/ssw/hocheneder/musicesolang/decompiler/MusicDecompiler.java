@@ -156,7 +156,7 @@ public class MusicDecompiler {
                 //Set subdivisions
                 Stream<Note> notes = measure.getNoteOrBackupOrForward().stream().filter(o -> o instanceof Note)
                         .map(o -> (Note) o)
-                        .filter(n -> n.getVoice().equals("1") && n.getPitch() != null);
+                        .filter(n -> "1".equals(n.getVoice()) && BigInteger.ONE.equals(n.getStaff()) && n.getPitch() != null);
 
                 notes.forEach(n -> {
                     NoteType type = new NoteType();
@@ -214,7 +214,7 @@ public class MusicDecompiler {
     private int findNoteCount(ScorePartwise.Part.Measure measure) {
         return (int) measure.getNoteOrBackupOrForward().stream().filter(o -> o instanceof Note)
                 .map(o -> (Note) o)
-                .filter(n -> n.getVoice().equals("1") && n.getPitch() != null && n.getChord() == null).count(); // only primary voice
+                .filter(n -> "1".equals(n.getVoice()) && BigInteger.ONE.equals(n.getStaff()) && n.getChord() == null).count(); // only primary voice
     }
 
     private static Step[] toSteps(Step root, int op, int arg) {
