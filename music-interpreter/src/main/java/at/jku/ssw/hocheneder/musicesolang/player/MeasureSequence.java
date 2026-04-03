@@ -9,6 +9,7 @@ import javax.sound.midi.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 public class MeasureSequence {
 
@@ -38,10 +39,10 @@ public class MeasureSequence {
         try {
             Sequence sequence = new Sequence(Sequence.PPQ, 1024 / 4);
             // Track
-            Map<String, VoiceTrack> tracks = new HashMap<>();
+            Map<VoiceKey, VoiceTrack> tracks = new HashMap<>();
             measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Note)
-                    .map(o -> ((Note) o).getVoice())
+                    .map(o -> new VoiceKey(((Note) o).getVoice(), ((Note) o).getStaff().intValue()))
                     .distinct()
                     .forEach(v -> {
                         tracks.put(v, new VoiceTrack(sequence.createTrack()));
@@ -55,7 +56,7 @@ public class MeasureSequence {
 
             while (iter.hasNext()) {
                 Note n = iter.next();
-                VoiceTrack track = tracks.get(n.getVoice());
+                VoiceTrack track = tracks.get(new VoiceKey(n.getVoice(), n.getStaff().intValue()));
                 if (n.getChord() == null) {
                     track.ticks += track.lastDur;
                 }
@@ -94,6 +95,29 @@ public class MeasureSequence {
 
         private VoiceTrack(Track track) {
             this.track = track;
+        }
+    }
+
+    private static class VoiceKey {
+
+        public final String voice;
+        public final int part;
+
+        private VoiceKey(String voice, int part) {
+            this.voice = voice;
+            this.part = part;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            VoiceKey voiceKey = (VoiceKey) o;
+            return part == voiceKey.part && Objects.equals(voice, voiceKey.voice);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(voice, part);
         }
     }
 
