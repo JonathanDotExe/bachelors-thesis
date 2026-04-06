@@ -48,7 +48,12 @@ public class MeasureSequencer implements IntConsumer, AutoCloseable, MeasureStor
         if (sequencer != null) {
             throw new IllegalStateException("Already initialized. Measures can't be added anymore.");
         }
-        measures.computeIfAbsent(id, i -> new MeasureSequence((measure)));
+        if (measures.containsKey(id)) {
+            measures.get(id).addSequence(measure);
+        }
+        else {
+            measures.put(id, new MeasureSequence(measure));
+        }
     }
 
     @Override

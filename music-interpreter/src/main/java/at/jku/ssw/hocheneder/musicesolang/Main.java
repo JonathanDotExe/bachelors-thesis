@@ -14,14 +14,14 @@ import java.io.InputStream;
 public class Main {
 
     public static void main(String[] args) throws IOException, Marshalling.UnmarshallingException, MidiUnavailableException {
-        String filename = args.length > 0 ? args[0] : "output.xml";
+        String filename = args.length > 0 ? args[0] : "input.xml";
         System.out.println("Loading file " + filename);
         try (InputStream input = new FileInputStream(filename);
              MeasureSequencer sequencer = new MeasureSequencer();) {
             MusicCompiler compiler = new MusicCompiler(input);
 
             System.out.println("Compiling ...");
-            Code code = compiler.compile(true, sequencer);
+            Code code = compiler.compile(true, sequencer, "P1");
             System.out.println("Compilation successful.");
             System.out.println("Generated code:");
             System.out.println(code);

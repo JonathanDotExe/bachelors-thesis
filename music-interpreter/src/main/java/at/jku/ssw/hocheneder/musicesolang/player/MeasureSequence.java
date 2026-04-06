@@ -16,7 +16,16 @@ public class MeasureSequence {
     private final Sequence sequence;
 
     public MeasureSequence(ScorePartwise.Part.Measure measure) {
-        sequence = measureToSequence(measure);
+        try {
+            sequence = new Sequence(Sequence.PPQ, 1024 / 4);
+        } catch (InvalidMidiDataException e) {
+            throw new RuntimeException(e);
+        }
+        measureToSequence(measure, sequence);
+    }
+
+    void addSequence(ScorePartwise.Part.Measure measure) {
+        measureToSequence(measure, sequence);
     }
 
     public void play(Sequencer sequencer) throws InvalidMidiDataException {
@@ -34,10 +43,13 @@ public class MeasureSequence {
         }
     }
 
-    private static Sequence measureToSequence(ScorePartwise.Part.Measure measure) {
-        // FIXME: consider staffs
+    /**
+     *
+     * @param measure
+     * @param sequence must have a divisionType PPQ and a resolution of 256
+     */
+    private static void measureToSequence(ScorePartwise.Part.Measure measure, Sequence sequence) {
         try {
-            Sequence sequence = new Sequence(Sequence.PPQ, 1024 / 4);
             // Track
             Map<VoiceKey, VoiceTrack> tracks = new HashMap<>();
             measure.getNoteOrBackupOrForward().stream()
@@ -81,7 +93,6 @@ public class MeasureSequence {
                 cc.setMessage(ShortMessage.CONTROL_CHANGE, 0, 1, 127);
                 track.track.add(new MidiEvent(cc, track.ticks));
             }
-            return sequence;
         } catch (InvalidMidiDataException e) {
             throw new RuntimeException(e);
         }

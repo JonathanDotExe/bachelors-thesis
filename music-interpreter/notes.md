@@ -75,8 +75,7 @@ Current progress 13.03.2026
   - all eight notes
     - TODO: dynamically scale note values according to length of numbers
   - jumps are converted to barline labels correctly
-  - TODO: fill up empty space with rests each bar
-  - TODO: check format validity (currently can't open in musescore but the compiler correctly recompiles it)
+  - fill up empty space with rests each bar
 
 Future TODOs:
 - check a lot of assumptions against music xml standard
@@ -85,7 +84,8 @@ Future TODOs:
   - maybe modulo assignment of opcodes?
   - other idea first note of bar denotes reference point not key signature?
 - write a midi player and use it to play the measures
- 
+- support triplets in MIDI player (divisions/durations)
+- optional: support ScoreTimewise
 
 
 

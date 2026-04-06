@@ -8,6 +8,7 @@ import org.audiveris.proxymusic.util.Marshalling;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.String;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -24,11 +25,17 @@ public class MusicCompiler {
     }
 
     public Code compile() {
-        return compile(false, null);
+        return compile(false, null, "P1");
     }
 
-    public Code compile(boolean writeMeasure, MeasureStore store) {
-        ScorePartwise.Part part = score.getPart().getFirst(); //FIXME first or first id?
+    public Code compile(boolean writeMeasure, MeasureStore store, String partId) {
+        Optional<ScorePartwise.Part> opt = score.getPart().stream().filter(p -> partId.equals(((ScorePart) p.getId()).getId())).findFirst();
+
+        if (opt.isEmpty()) {
+            throw new RuntimeException("Part with the given id " + partId + " does not exist.");
+        }
+
+        ScorePartwise.Part part = opt.get(); //get part with id
         //For now: always assume C major
         Step root = Step.C;
         Code code = new Code();
@@ -37,6 +44,7 @@ public class MusicCompiler {
 
         //Measures = commands
         int measureId = 1;
+        Map<String, Integer> numToId = new HashMap<>();
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
             //Root
             Optional<Attributes> attr = measure.getNoteOrBackupOrForward().stream()
@@ -56,9 +64,8 @@ public class MusicCompiler {
             if (writeMeasure) {
                 code.add(-measureId);
             }
-            if (store != null) {
-                store.addMeasure(measureId, measure);
-            }
+            numToId.put(measure.getNumber(), measureId);
+
             //Notes => bytes
             Iterator<Note> notes = new NoteIterator(measure);
             try {
@@ -108,6 +115,18 @@ public class MusicCompiler {
         for (int l : labels) {
             Code.Label label = code.createLabel();
             label.targetHere(l);
+        }
+
+        // Store measures
+        // Note: measures that do not occur in the main line are not stored/played by the sequencer
+        if (store != null) {
+            for (ScorePartwise.Part p : score.getPart()) {
+                for (ScorePartwise.Part.Measure measure : p.getMeasure()) {
+                    if (numToId.containsKey(measure.getNumber())) {
+                        store.addMeasure(numToId.get(measure.getNumber()), measure);
+                    }
+                }
+            }
         }
 
         return code;
