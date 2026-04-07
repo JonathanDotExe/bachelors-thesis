@@ -54,7 +54,8 @@ public class MeasureSequence {
             Map<VoiceKey, VoiceTrack> tracks = new HashMap<>();
             measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Note)
-                    .map(o -> new VoiceKey(((Note) o).getVoice(), ((Note) o).getStaff().intValue()))
+                    .map (o -> (Note) o)
+                    .map(o -> new VoiceKey(o.getVoice(), o.getStaff() == null ? 1 : o.getStaff().intValue()))
                     .distinct()
                     .forEach(v -> {
                         tracks.put(v, new VoiceTrack(sequence.createTrack()));
@@ -68,7 +69,8 @@ public class MeasureSequence {
 
             while (iter.hasNext()) {
                 Note n = iter.next();
-                VoiceTrack track = tracks.get(new VoiceKey(n.getVoice(), n.getStaff().intValue()));
+
+                VoiceTrack track = tracks.get(new VoiceKey(n.getVoice(), n.getStaff() == null ? 1 : n.getStaff().intValue()));
                 if (n.getChord() == null) {
                     track.ticks += track.lastDur;
                 }

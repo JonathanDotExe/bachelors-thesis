@@ -204,7 +204,7 @@ public class MusicCompiler {
             base = measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Note)
                     .map(o -> (Note) o)
-                    .filter(n -> "1".equals(n.getVoice()) && BigInteger.ONE.equals(n.getStaff()) && n.getPitch() != null) // only primary voice
+                    .filter(n -> "1".equals(n.getVoice()) && (BigInteger.ONE.equals(n.getStaff()) || n.getStaff() == null) && n.getPitch() != null) // only primary voice
                     .iterator();
             if (base.hasNext()) {
                 next = base.next();
