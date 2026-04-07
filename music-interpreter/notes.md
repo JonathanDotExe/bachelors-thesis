@@ -49,7 +49,7 @@ Current progress 13.03.2026
   - negative opcodes mark measure ids and are ignored
   - a measure callback is called so the current measure can be tracked during execution
     - e.g. for playing back the measures
-    - TODO check if jumps are correctly placed so that the jumps jump to the position before the measures
+    - [done] check if jumps are correctly placed so that the jumps jump to the position before the measures
 - Music compiler
   - Transforms music xml into bytecode of our interpreter language
   - Language definition

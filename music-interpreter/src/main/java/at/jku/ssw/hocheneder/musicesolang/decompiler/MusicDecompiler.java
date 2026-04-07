@@ -47,16 +47,23 @@ public class MusicDecompiler {
         ScorePartwise.Part part = new ScorePartwise.Part();
         part.setId(scorePart);
 
+        //Buffer measure
+        ScorePartwise.Part.Measure bufferMeasure = new ScorePartwise.Part.Measure();
+        measures.put(code.length, bufferMeasure);
+        bufferMeasure.setNumber(count++ + "");
+        part.getMeasure().add(bufferMeasure);
+
         //Measures
+        ScorePartwise.Part.Measure oldMeasure = bufferMeasure;
         for (int i = 0; i < code.length; i++) {
             ScorePartwise.Part.Measure measure = new ScorePartwise.Part.Measure();
             while (i < code.length && code[i] < 0) { //ignore measure id markings
-                measures.put(i, measure);
+                measures.put(i, oldMeasure);
                 i++;
             }
 
             if (i < code.length) {
-                measures.put(i, measure);
+                measures.put(i, oldMeasure);
                 measure.setNumber(count + "");
 
                 int op = code[i];
@@ -98,36 +105,14 @@ public class MusicDecompiler {
                 count++;
                 part.getMeasure().add(measure);
             }
+            oldMeasure = measure;
         }
 
         //Buffer measure
-        ScorePartwise.Part.Measure bufferMeasure = new ScorePartwise.Part.Measure();
+        bufferMeasure = new ScorePartwise.Part.Measure();
         measures.put(code.length, bufferMeasure);
         bufferMeasure.setNumber(count++ + "");
         part.getMeasure().add(bufferMeasure);
-
-        //Resolve labels
-        int id = 0;
-        for (Map.Entry<Integer, DecompilerLabel> entry : labels.entrySet()) {
-            if (measures.containsKey(entry.getKey())) {
-                ScorePartwise.Part.Measure measure = measures.get(entry.getKey());
-                //Insert barline
-                Barline barline = new Barline();
-                BarStyleColor barStyleColor = new BarStyleColor();
-                barStyleColor.setValue(BarStyle.HEAVY_HEAVY);
-                barline.setBarStyle(barStyleColor);
-                barline.setLocation(RightLeftMiddle.LEFT);
-
-                measure.getNoteOrBackupOrForward().addFirst(barline);
-
-                //Fixup
-                entry.getValue().fixup(root, id);
-            }
-            else {
-                throw new IllegalArgumentException("Invalid jump in code.");
-            }
-            id++;
-        }
 
         //Normalize note values
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
@@ -190,6 +175,29 @@ public class MusicDecompiler {
                     stepsLeft -= nextSub;
                 }
             }
+        }
+
+        //Resolve labels
+        int id = 0;
+        for (Map.Entry<Integer, DecompilerLabel> entry : labels.entrySet()) {
+            if (measures.containsKey(entry.getKey())) {
+                ScorePartwise.Part.Measure measure = measures.get(entry.getKey());
+                //Insert barline
+                Barline barline = new Barline();
+                BarStyleColor barStyleColor = new BarStyleColor();
+                barStyleColor.setValue(BarStyle.LIGHT_LIGHT);
+                barline.setBarStyle(barStyleColor);
+                barline.setLocation(RightLeftMiddle.RIGHT);
+
+                measure.getNoteOrBackupOrForward().add(barline);
+
+                //Fixup
+                entry.getValue().fixup(root, id);
+            }
+            else {
+                throw new IllegalArgumentException("Invalid jump in code.");
+            }
+            id++;
         }
 
         //Attributes

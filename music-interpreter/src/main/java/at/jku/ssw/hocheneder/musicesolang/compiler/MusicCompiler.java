@@ -16,6 +16,8 @@ public class MusicCompiler {
 
     public static final int BASE = Step.values().length;
 
+    private static final Set<BarStyle> LABEL_BAR_STYLES = EnumSet.of(BarStyle.HEAVY_HEAVY, BarStyle.HEAVY_LIGHT, BarStyle.LIGHT_HEAVY, BarStyle.LIGHT_LIGHT);
+
     private final ScorePartwise score;
 
     public MusicCompiler(InputStream in) throws IOException, Marshalling.UnmarshallingException {
@@ -46,6 +48,7 @@ public class MusicCompiler {
         int measureId = 1;
         Map<String, Integer> numToId = new HashMap<>();
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
+            System.err.println(measure.getNumber());
             //Root
             Optional<Attributes> attr = measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Attributes)
@@ -98,11 +101,13 @@ public class MusicCompiler {
                     .forEach(b -> {
                         if (b.getBarStyle() != null &&
                                 b.getRepeat() == null &&
-                                (b.getBarStyle().getValue() == BarStyle.HEAVY_HEAVY || b.getBarStyle().getValue() == BarStyle.LIGHT_LIGHT)) {
+                                LABEL_BAR_STYLES.contains(b.getBarStyle().getValue())) {
                             if (b.getLocation() == null || b.getLocation() == RightLeftMiddle.RIGHT) {
+                                System.out.println("Adding label end: " + endPc);
                                 labels.add(endPc);
                             }
                             else if (b.getLocation() == RightLeftMiddle.LEFT) {
+                                System.out.println("Adding label start: " + endPc);
                                 labels.add(startPc);
                             }
                         }
