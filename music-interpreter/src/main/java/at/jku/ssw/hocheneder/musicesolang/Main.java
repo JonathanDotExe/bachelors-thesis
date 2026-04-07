@@ -32,7 +32,7 @@ public class Main {
 
             sequencer.initialize();
 
-            Interpreter.interpret((m) -> {}, code.getCode());
+            Interpreter.interpret(sequencer, code.getCode());
 
             System.out.println();
             System.out.println("Finished");

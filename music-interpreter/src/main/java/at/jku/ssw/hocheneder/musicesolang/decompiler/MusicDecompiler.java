@@ -49,7 +49,6 @@ public class MusicDecompiler {
 
         //Buffer measure
         ScorePartwise.Part.Measure bufferMeasure = new ScorePartwise.Part.Measure();
-        measures.put(code.length, bufferMeasure);
         bufferMeasure.setNumber(count++ + "");
         part.getMeasure().add(bufferMeasure);
 
@@ -110,7 +109,7 @@ public class MusicDecompiler {
 
         //Buffer measure
         bufferMeasure = new ScorePartwise.Part.Measure();
-        measures.put(code.length, bufferMeasure);
+        measures.put(code.length, oldMeasure);
         bufferMeasure.setNumber(count++ + "");
         part.getMeasure().add(bufferMeasure);
 
