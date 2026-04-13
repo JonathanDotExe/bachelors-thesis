@@ -41,9 +41,9 @@ public class Interpreter {
 		this.code = code;
 		this.measureCallback = measureCallback;
 		this.pc = 0;
-		this.eStack = new int[100];
+		this.eStack = new int[1024];
 		this.ePos = 0;
-		this.data = new int[100];
+		this.data = new int[1024];
 	}
 
 	private void run() throws IOException {

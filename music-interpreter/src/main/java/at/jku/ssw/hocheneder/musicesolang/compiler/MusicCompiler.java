@@ -6,9 +6,11 @@ import at.jku.ssw.hocheneder.musicesolang.music.NoteUtil;
 import org.audiveris.proxymusic.*;
 import org.audiveris.proxymusic.util.Marshalling;
 
+import javax.smartcardio.ATR;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.String;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -53,7 +55,7 @@ public class MusicCompiler {
             Optional<Attributes> attr = measure.getNoteOrBackupOrForward().stream()
                     .filter(o -> o instanceof Attributes)
                     .map(o -> (Attributes) o)
-                    .findFirst();
+                    .reduce((first, second) -> second); //get last attributes
             if (attr.isPresent()) {
                 List<Key> key = attr.get().getKey();
                 if (!key.isEmpty()) {
@@ -125,10 +127,21 @@ public class MusicCompiler {
         // Store measures
         // Note: measures that do not occur in the main line are not stored/played by the sequencer
         if (store != null) {
+            int divisions = 1;
             for (ScorePartwise.Part p : score.getPart()) {
                 for (ScorePartwise.Part.Measure measure : p.getMeasure()) {
+                    Optional<Attributes> attr = measure.getNoteOrBackupOrForward().stream()
+                            .filter(o -> o instanceof Attributes)
+                            .map(o -> (Attributes) o)
+                            .reduce((first, second) -> second); //get last attributes
+                    if (attr.isPresent()) {
+                        BigDecimal div = attr.get().getDivisions();
+                        if (div != null) {
+                            divisions = div.intValue();
+                        }
+                    }
                     if (numToId.containsKey(measure.getNumber())) {
-                        store.addMeasure(numToId.get(measure.getNumber()), measure);
+                        store.addMeasure(numToId.get(measure.getNumber()), measure, divisions);
                     }
                 }
             }

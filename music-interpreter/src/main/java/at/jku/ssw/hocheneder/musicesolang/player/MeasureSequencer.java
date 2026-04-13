@@ -44,15 +44,15 @@ public class MeasureSequencer implements IntConsumer, AutoCloseable, MeasureStor
     }
 
     @Override
-    public void addMeasure(int id, ScorePartwise.Part.Measure measure) {
+    public void addMeasure(int id, ScorePartwise.Part.Measure measure, int divisions) {
         if (sequencer != null) {
             throw new IllegalStateException("Already initialized. Measures can't be added anymore.");
         }
         if (measures.containsKey(id)) {
-            measures.get(id).addSequence(measure);
+            measures.get(id).addSequence(measure, divisions);
         }
         else {
-            measures.put(id, new MeasureSequence(measure));
+            measures.put(id, new MeasureSequence(measure, divisions));
         }
     }
 

@@ -13,19 +13,21 @@ import java.util.Objects;
 
 public class MeasureSequence {
 
+    private static final int QUARTER_RES = 768;
     private final Sequence sequence;
 
-    public MeasureSequence(ScorePartwise.Part.Measure measure) {
+    public MeasureSequence(ScorePartwise.Part.Measure measure, int divisions) {
+        //Fixme multiple sequences for exact resolution?
         try {
-            sequence = new Sequence(Sequence.PPQ, 1024 / 4);
+            sequence = new Sequence(Sequence.PPQ, QUARTER_RES); // 1024th notes => 256 divisons of quarter, triplets => 384 * 2 to support normal notes again
         } catch (InvalidMidiDataException e) {
             throw new RuntimeException(e);
         }
-        measureToSequence(measure, sequence);
+        measureToSequence(measure, sequence, divisions);
     }
 
-    void addSequence(ScorePartwise.Part.Measure measure) {
-        measureToSequence(measure, sequence);
+    void addSequence(ScorePartwise.Part.Measure measure, int divisions) {
+        measureToSequence(measure, sequence, divisions);
     }
 
     public void play(Sequencer sequencer) throws InvalidMidiDataException {
@@ -48,7 +50,8 @@ public class MeasureSequence {
      * @param measure
      * @param sequence must have a divisionType PPQ and a resolution of 256
      */
-    private static void measureToSequence(ScorePartwise.Part.Measure measure, Sequence sequence) {
+    private static void measureToSequence(ScorePartwise.Part.Measure measure, Sequence sequence, int divisions) {
+        int durFactor = QUARTER_RES/divisions;
         try {
             // Track
             Map<VoiceKey, VoiceTrack> tracks = new HashMap<>();
@@ -74,9 +77,7 @@ public class MeasureSequence {
                 if (n.getChord() == null) {
                     track.ticks += track.lastDur;
                 }
-                NoteType type = n.getType();
-                int noteValue = type != null ? NoteUtil.REVERSE_NOTE_VALUES.getOrDefault(type.getValue(), 4) : 4;
-                track.lastDur = 1024 / noteValue;
+                track.lastDur = (n.getDuration() != null ? n.getDuration().intValue() : 0) * durFactor;
                 if (n.getPitch() != null) { //Note
                     int pitch = NoteUtil.pitchToMidiNote(n.getPitch());
                     ShortMessage on = new ShortMessage();

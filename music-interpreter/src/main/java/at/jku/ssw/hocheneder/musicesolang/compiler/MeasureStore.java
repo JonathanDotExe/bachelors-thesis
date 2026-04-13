@@ -5,6 +5,6 @@ import org.audiveris.proxymusic.ScorePartwise;
 
 public interface MeasureStore {
 
-    void addMeasure(int id, ScorePartwise.Part.Measure measure);
+    void addMeasure(int id, ScorePartwise.Part.Measure measure, int divisions);
 
 }

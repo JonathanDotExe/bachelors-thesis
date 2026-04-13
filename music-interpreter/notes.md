@@ -84,7 +84,7 @@ Future TODOs:
   - maybe modulo assignment of opcodes?
   - other idea first note of bar denotes reference point not key signature?
 - write a midi player and use it to play the measures
-- support triplets in MIDI player (divisions/durations)
+- support triplets, dotted and bound notes in MIDI player (divisions/durations)
 - optional: support ScoreTimewise
 
 

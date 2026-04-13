@@ -14,7 +14,7 @@ import java.io.InputStream;
 public class Main {
 
     public static void main(String[] args) throws IOException, Marshalling.UnmarshallingException, MidiUnavailableException {
-        String filename = args.length > 0 ? args[0] : "output.xml";
+        String filename = args.length > 0 ? args[0] : "staffs.xml";
         System.out.println("Loading file " + filename);
         try (InputStream input = new FileInputStream(filename);
              MeasureSequencer sequencer = new MeasureSequencer();) {
