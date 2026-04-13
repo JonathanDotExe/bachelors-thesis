@@ -84,9 +84,26 @@ Future TODOs:
   - maybe modulo assignment of opcodes?
   - other idea first note of bar denotes reference point not key signature?
 - write a midi player and use it to play the measures
-- support triplets, dotted and bound notes in MIDI player (divisions/durations)
+- bound notes in MIDI player (divisions/durations)
+- excat divisions in  midi player
 - optional: support ScoreTimewise
 
+
+CLI:
+run [file]  // runs bytecode or plaintext bytecode file
+  --play [file] // plays the corresponding music xml file, maybe not possible
+  --verbose // shows debug messages with each instruction
+interpret [file] // compiles music xml to bytecode and rule
+  --play // Plays back the music in real time
+  --verbose // shows debug messages with each instruction
+  --part // specifies the part id to use in the mxl file
+compile [file] // compiles musicxml to bytecode
+  --no-measures // doesn't encode measure markings
+  --plain       // uses plaintext bytecode format
+  --output [file] //specifies the output file
+  --part // specifies the part id to use in the mxl file
+decompile [file] // decompiles bytecode to musicxml
+  --output [file] //specifies the output file
 
 
 
