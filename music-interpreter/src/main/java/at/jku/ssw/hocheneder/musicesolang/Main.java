@@ -24,6 +24,7 @@ public class Main {
     private static final String PLAIN_OPTION = "plain";
     private static final String NO_MEASURES_OPTION = "no-measures";
     private static final String OUTPUT_OPTION = "output";
+    private static final String HELP_OPTION = "help";
 
     private static final String PLAY_SHORT_OPTION = "P";
     private static final String VERBOSE_SHORT_OPTION = "v";
@@ -31,6 +32,7 @@ public class Main {
     private static final String PLAIN_SHORT_OPTION = "t";
     private static final String NO_MEASURES_SHORT_OPTION = "X";
     private static final String OUTPUT_SHORT_OPTION = "o";
+    private static final String HELP_SHORT_OPTION = "h";
 
 
 
@@ -40,6 +42,7 @@ public class Main {
             return;
         }
 
+        HelpFormatter formatter = HelpFormatter.builder().setShowSince(false).get();
 
         String[] optionArr = Arrays.copyOfRange(args, 1, args.length);
 
@@ -53,6 +56,11 @@ public class Main {
         runOptions.addOption(Option.builder(VERBOSE_SHORT_OPTION)
                 .longOpt(VERBOSE_OPTION)
                 .desc("shows debug messages with each instruction")
+                .get()
+        );
+        runOptions.addOption(Option.builder(HELP_SHORT_OPTION)
+                .longOpt(HELP_OPTION)
+                .desc("shows the usage and available options of this command")
                 .get()
         );
 
@@ -71,6 +79,11 @@ public class Main {
                 .longOpt(PART_OPTION)
                 .desc("specifies the part id to use in the mxl file")
                 .hasArg()
+                .get()
+        );
+        interpretOptions.addOption(Option.builder(HELP_SHORT_OPTION)
+                .longOpt(HELP_OPTION)
+                .desc("shows the usage and available options of this command")
                 .get()
         );
 
@@ -97,12 +110,22 @@ public class Main {
                 .hasArg()
                 .get()
         );
+        compileOptions.addOption(Option.builder(HELP_SHORT_OPTION)
+                .longOpt(HELP_OPTION)
+                .desc("shows the usage and available options of this command")
+                .get()
+        );
 
         Options decompileOptions = new Options();
         decompileOptions.addOption(Option.builder(OUTPUT_SHORT_OPTION)
                 .longOpt(OUTPUT_OPTION)
                 .desc("specifies the output file")
                 .hasArg()
+                .get()
+        );
+        decompileOptions.addOption(Option.builder(HELP_SHORT_OPTION)
+                .longOpt(HELP_OPTION)
+                .desc("shows the usage and available options of this command")
                 .get()
         );
 
@@ -114,14 +137,24 @@ public class Main {
                 try {
                     CommandLine line = parser.parse(runOptions, optionArr);
 
+                    if (line.hasOption(HELP_OPTION)) {
+                        formatter.printHelp("cmd run <file>", "runs bytecode or plaintext bytecode file", runOptions, "", false);
+                        return;
+                    }
+
                     System.out.println("Run not implemented yet.");
                 } catch (ParseException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e.getMessage() + ". Use cmd run -h for a list of available options.");
                 }
             }
             case "interpret" -> {
                 try {
                     CommandLine line = parser.parse(interpretOptions, optionArr);
+
+                    if (line.hasOption(HELP_OPTION)) {
+                        formatter.printHelp("cmd interpret <file>", "compiles music xml to bytecode in memory and runs it", interpretOptions, "", false);
+                        return;
+                    }
 
                     if (line.getArgs().length == 0) {
                         System.out.println("No input file specified.");
@@ -167,13 +200,18 @@ public class Main {
                         System.out.println("Finished");
                     }
                 } catch (ParseException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e.getMessage() + ". Use cmd interpret -h for a list of available options.");
                 }
             }
             case "compile" -> {
                 try {
                     CommandLine line = parser.parse(compileOptions, optionArr);
 
+                    if (line.hasOption(HELP_OPTION)) {
+                        formatter.printHelp("cmd compile <file>", "compiles musicxml to bytecode", compileOptions, "", false);
+                        return;
+                    }
+
                     if (line.getArgs().length == 0) {
                         System.out.println("No input file specified.");
                         return;
@@ -181,13 +219,18 @@ public class Main {
 
                     System.out.println("Compile not implemented yet.");
                 } catch (ParseException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e.getMessage() + ". Use cmd compile -h for a list of available options.");
                 }
             }
             case "decompile" -> {
                 try {
                     CommandLine line = parser.parse(decompileOptions, optionArr);
 
+                    if (line.hasOption(HELP_OPTION)) {
+                        formatter.printHelp("cmd decompile <file>", "decompiles bytecode to musicxml", decompileOptions, "", false);
+                        return;
+                    }
+
                     if (line.getArgs().length == 0) {
                         System.out.println("No input file specified.");
                         return;
@@ -195,21 +238,22 @@ public class Main {
 
                     System.out.println("Compile not implemented yet.");
                 } catch (ParseException e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e.getMessage() + ". Use cmd decompile -h for a list of available options.");
                 }
             }
             case "help" -> {
-                HelpFormatter formatter = HelpFormatter.builder().setShowSince(false).get();
+                System.out.println("The following subcommands are supported:");
+                System.out.println("\thelp\t\t\t\tprints all available commands and their explanations");
+                System.out.println("\trun <file>\t\t\truns bytecode or plaintext bytecode file");
+                System.out.println("\tinterpret <file>\tcompiles music xml to bytecode in memory and runs it");
+                System.out.println("\tcompile <file>\t\tcompiles musicxml to bytecode");
+                System.out.println("\tdecompile <file>\tdecompiles bytecode to musicxml");
 
-                formatter.printHelp("cmd help", "prints all available commands and their explanations", Collections.emptyList(), "", false);
                 System.out.println();
-                formatter.printHelp("cmd run [file]", "runs bytecode or plaintext bytecode file", runOptions, "", false);
-                System.out.println();
-                formatter.printHelp("cmd interpret [file]", "compiles music xml to bytecode in memory and runs it", interpretOptions, "", false);
-                System.out.println();
-                formatter.printHelp("cmd compile [file]", "compiles musicxml to bytecode", compileOptions, "", false);
-                System.out.println();
-                formatter.printHelp("cmd decompile [file]", "decompiles bytecode to musicxml", decompileOptions, "", false);
+                System.out.println("Use the -h option with any command to get a more detailed overview of it's usage.");
+            }
+            default -> {
+                System.out.println("Unrecognized command, use cmd help to see a list of all available commands.");
             }
         }
     }
