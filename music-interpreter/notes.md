@@ -18,7 +18,7 @@ Thoughts/Questions
   - => i would tend torwards direct mapping
 - How are jumps/loops handled
   - simply through instructions => most flexibitlity in programm, nesting
-    - playback wouldn't necesarilit be equal to how the piece would normally be played
+    - playback wouldn't necesarily be equal to how the piece would normally be played
   - through repetitions, da capo, etc. => 1:1 correspondence of musical structure
 - how to separate instructions
   - per measure?
@@ -43,7 +43,7 @@ Example encoding:
 
 
 
-Current progress 13.03.2026
+Current progress 14.04.2026
 - Interpreter
   - interprets our bytecode
   - negative opcodes mark measure ids and are ignored
@@ -59,6 +59,7 @@ Current progress 13.03.2026
     - Each measure is one instruction
     - 2 7-bytes - operation
       - empty bars/only one note => ignored
+      - opcodes are modulod giving more redundancy => more musical freedom
     - arbitrary amount of 7-bytes afterwards => argument, flexible interger size
       - if no argument is needed, rest is ignored
       - grace notes at the start of a number => negative number, otherwise ignored
@@ -72,38 +73,44 @@ Current progress 13.03.2026
   - Transforms bytecode into music xml
   - all in c major
   - one measure per instruction
-  - all eight notes
-    - TODO: dynamically scale note values according to length of numbers
+  - note values are dynamically scaled
   - jumps are converted to barline labels correctly
   - fill up empty space with rests each bar
+- CLI (work in progress)
+  - run [file]  // runs bytecode or plaintext bytecode file
+    --play [file] // plays the corresponding music xml file, maybe not possible
+    --verbose // shows debug messages with each instruction
+  - interpret [file] // compiles music xml to bytecode in memory and runs it
+    --play // Plays back the music in real time
+    --verbose // shows debug messages with each instruction
+    --part // specifies the part id to use in the mxl file
+  - compile [file] // compiles musicxml to bytecode
+    --no-measures // doesn't encode measure markings
+    --plain       // uses plaintext bytecode format
+    --output [file] //specifies the output file
+    --part // specifies the part id to use in the mxl file
+  - decompile [file] // decompiles bytecode to musicxml
+    --output [file] //specifies the output file
+  - help
+- Music Sequencer
+  - plays back the music in sync with program execution
+  - all parts and voices
+  - TODO: consider tempo input/markings
+  - TODO: exact timing divisions
+  - TODO: consider ties
 
 Future TODOs:
 - check a lot of assumptions against music xml standard
 - write a lot of test programs
 - => use test results to find more musically interesting opcodes
-  - maybe modulo assignment of opcodes?
   - other idea first note of bar denotes reference point not key signature?
-- write a midi player and use it to play the measures
 - bound notes in MIDI player (divisions/durations)
-- excat divisions in  midi player
+- exact divisions in  midi player
 - optional: support ScoreTimewise
 
 
 CLI:
-run [file]  // runs bytecode or plaintext bytecode file
-  --play [file] // plays the corresponding music xml file, maybe not possible
-  --verbose // shows debug messages with each instruction
-interpret [file] // compiles music xml to bytecode and rule
-  --play // Plays back the music in real time
-  --verbose // shows debug messages with each instruction
-  --part // specifies the part id to use in the mxl file
-compile [file] // compiles musicxml to bytecode
-  --no-measures // doesn't encode measure markings
-  --plain       // uses plaintext bytecode format
-  --output [file] //specifies the output file
-  --part // specifies the part id to use in the mxl file
-decompile [file] // decompiles bytecode to musicxml
-  --output [file] //specifies the output file
+
 
 
 
