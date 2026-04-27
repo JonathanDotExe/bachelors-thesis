@@ -58,7 +58,9 @@ public class MeasureSequencer implements IntConsumer, AutoCloseable, MeasureStor
 
     @Override
     public void close() {
-        sequencer.close();
-        synth.close();
+        if (sequencer != null) {
+            sequencer.close();
+            synth.close();
+        }
     }
 }

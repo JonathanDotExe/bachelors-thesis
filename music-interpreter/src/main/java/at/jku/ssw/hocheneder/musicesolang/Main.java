@@ -1,17 +1,18 @@
 package at.jku.ssw.hocheneder.musicesolang;
 
 import at.jku.ssw.hocheneder.musicesolang.compiler.MusicCompiler;
+import at.jku.ssw.hocheneder.musicesolang.decompiler.MusicDecompiler;
+import at.jku.ssw.hocheneder.musicesolang.interpreter.ByteCodeIO;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Interpreter;
 import at.jku.ssw.hocheneder.musicesolang.player.MeasureSequencer;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.help.HelpFormatter;
+import org.audiveris.proxymusic.ScorePartwise;
 import org.audiveris.proxymusic.util.Marshalling;
 
 import javax.sound.midi.MidiUnavailableException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ public class Main {
 
 
 
-    public static void main(String[] args) throws IOException, Marshalling.UnmarshallingException, MidiUnavailableException {
+    public static void main(String[] args) throws IOException, Marshalling.UnmarshallingException, MidiUnavailableException, Marshalling.MarshallingException {
         if (args.length == 0) {
             System.out.println("Error, no command specified. Use command help for more information.");
             return;
@@ -47,12 +48,6 @@ public class Main {
         String[] optionArr = Arrays.copyOfRange(args, 1, args.length);
 
         Options runOptions = new Options();
-        runOptions.addOption(Option.builder(PLAY_SHORT_OPTION)
-                .longOpt(PLAY_OPTION)
-                .desc("plays the given music xml file in sync")
-                .hasArg()
-                .get()
-        );
         runOptions.addOption(Option.builder(VERBOSE_SHORT_OPTION)
                 .longOpt(VERBOSE_OPTION)
                 .desc("shows debug messages with each instruction")
@@ -142,7 +137,18 @@ public class Main {
                         return;
                     }
 
-                    System.out.println("Run not implemented yet.");
+                    String filename = line.getArgs()[0];
+                    System.out.println("Loading file " + filename);
+                    try (InputStream input = new FileInputStream(filename);) {
+                        boolean verbose = line.hasOption(VERBOSE_OPTION);
+                        if (verbose) {
+                            //TODO  verbose logging
+                        }
+
+                        int[] code = ByteCodeIO.loadCode(input);
+
+                        Interpreter.interpret(code);
+                    }
                 } catch (ParseException e) {
                     System.out.println(e.getMessage() + ". Use cmd run -h for a list of available options.");
                 }
@@ -171,7 +177,7 @@ public class Main {
                             //TODO  verbose logging
                         }
 
-                        String part = line.getOptionValue(PLAIN_OPTION);
+                        String part = line.getOptionValue(PART_OPTION);
                         if (part == null || part.isBlank()) {
                             part = "P1";
                         }
@@ -217,7 +223,45 @@ public class Main {
                         return;
                     }
 
-                    System.out.println("Compile not implemented yet.");
+                    String filename = line.getArgs()[0];
+                    System.out.println("Loading file " + filename);
+                    try (InputStream input = new FileInputStream(filename);) {
+                        boolean noMeasure = line.hasOption(NO_MEASURES_OPTION);
+                        boolean plain = line.hasOption(PLAIN_OPTION); //TODO
+
+                        String part = line.getOptionValue(PART_OPTION);
+                        if (part == null || part.isBlank()) {
+                            part = "P1";
+                        }
+
+                        String output = line.getOptionValue(OUTPUT_OPTION);
+                        if (output == null || output.isBlank()) {
+                            int lastIndex = filename.lastIndexOf( '.');
+                            output = filename.substring(0, lastIndex >= 0 ? lastIndex : filename.length()) + ".bin";
+
+                        }
+
+                        MusicCompiler compiler = new MusicCompiler(input);
+
+                        System.out.println("Compiling using part " + part +" ...");
+                        Code code = compiler.compile(!noMeasure, null, part);
+                        System.out.println("Compilation successful.");
+                        System.out.println("Generated code:");
+                        System.out.println(code);
+
+                        int[] c = code.getCode();
+
+                        System.out.println();
+                        System.out.println("Writing to file " + output + "... ");
+                        System.out.println();
+
+                        try (FileOutputStream out = new FileOutputStream(output)) {
+                            ByteCodeIO.writeCode(c, out);
+                        }
+
+                        System.out.println();
+                        System.out.println("Finished");
+                    }
                 } catch (ParseException e) {
                     System.out.println(e.getMessage() + ". Use cmd compile -h for a list of available options.");
                 }
@@ -236,7 +280,36 @@ public class Main {
                         return;
                     }
 
-                    System.out.println("Compile not implemented yet.");
+                    String filename = line.getArgs()[0];
+                    System.out.println("Loading file " + filename);
+                    try (InputStream input = new FileInputStream(filename);) {
+
+                        String output = line.getOptionValue(OUTPUT_OPTION);
+                        if (output == null || output.isBlank()) {
+                            int lastIndex = filename.lastIndexOf( '.');
+                            output = filename.substring(0, lastIndex >= 0 ? lastIndex : filename.length()) + ".xml";
+
+                        }
+
+                        int[] code = ByteCodeIO.loadCode(input);
+
+                        MusicDecompiler decompiler = new MusicDecompiler(code);
+
+                        System.out.println("Decompiling using part ...");
+                        ScorePartwise score = decompiler.generate(true); //TODO option
+                        System.out.println("Decompilation successful.");
+
+                        System.out.println();
+                        System.out.println("Writing to file " + output + "... ");
+                        System.out.println();
+
+                        try (FileOutputStream out = new FileOutputStream(output)) {
+                            Marshalling.marshal(score, out, false, 4);
+                        }
+
+                        System.out.println();
+                        System.out.println("Finished");
+                    }
                 } catch (ParseException e) {
                     System.out.println(e.getMessage() + ". Use cmd decompile -h for a list of available options.");
                 }
