@@ -25,12 +25,12 @@ public class Code {
         public static final int OUT_INT = 15;   // 3, 1 = E, D
 
         public static final Map<Integer, String> OPCODES = Map.ofEntries(
-                Map.entry(JMP_x, "JMP_x"),
+                Map.entry(JMP_x, "JMP"),
                 Map.entry(IS_NEG, "IS_NEG"),
                 Map.entry(NOT, "NOT"),
                 Map.entry(LOAD_x, "LOAD"),
-                Map.entry(STORE_x, "STORE_x"),
-                Map.entry(CONST_x, "CONST_x"),
+                Map.entry(STORE_x, "STORE"),
+                Map.entry(CONST_x, "CONST"),
                 Map.entry(DUP, "DUP"),
                 Map.entry(POP, "POP"),
                 Map.entry(ADD, "ADD"),

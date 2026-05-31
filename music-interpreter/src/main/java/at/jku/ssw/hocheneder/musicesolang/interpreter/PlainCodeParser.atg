@@ -1,0 +1,40 @@
+// import clauses in Java
+import java.util.HashMap;
+import java.util.Map;
+
+COMPILER PlainCode
+
+
+
+CHARACTERS
+// Declare character sets (such as number or word).
+letter = 'a'..'z' + 'A'..'Z' .
+digit = "0123456789" .
+
+
+
+TOKENS
+// Specify the tokens (or terminal symbols) of the language (such as number or ident) by using the character set defined above.
+word = letter { letter } .
+number = ["-"] digit { digit }.
+
+COMMENTS FROM "(*" TO "*)" // Multi-line comments should go from (* to *)
+COMMENTS FROM "//" TO "\n" // Single-line comments should go from // to \n
+IGNORE '\r' + '\t' // Ignore following symbols as whitespace: \r and \t.
+
+PRODUCTIONS
+    PlainCode =
+        [Instruction]
+        {"\n" {"\n"} Instruction}
+        .
+
+    OpCode<out int op> = word (. if (OPCODES.contains(t.val) { op = OPCODES.get(t.val); } else { op = -1; Error("OpCode " + t.val + " does not exists."); } .)
+        .
+
+    Instruction =
+        OpCode<out int op>      (. code.put(op); .)
+        [number                 (. code.put(Integer.parseInt(t.val)); .)
+        ]
+        .
+
+END PlainCode.
