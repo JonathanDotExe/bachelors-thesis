@@ -62,7 +62,7 @@ public class Code {
     }
 
     private final Vector<Integer> code = new Vector<>();
-    private final Map<Integer, Label> labels = new TreeMap<>();
+    private final Map<String, Label> labels = new TreeMap<>();
     private int nextLabel = 0;
 
     public void add(int... ops) {
@@ -81,15 +81,15 @@ public class Code {
     }
 
     public Label createLabel() {
-        if (labels.containsKey(nextLabel)) {
-            return labels.get(nextLabel++);
+        if (labels.containsKey("l" + nextLabel)) {
+            return labels.get("l" + nextLabel++);
         }
         Label l = new Label();
-        labels.put(nextLabel++, l);
+        labels.put("l" + nextLabel++, l);
         return l;
     }
 
-    public Label getLabel(int id) {
+    public Label getLabel(String id) {
         if (labels.containsKey(id)) {
             return labels.get(id);
         }
@@ -97,6 +97,10 @@ public class Code {
         Label l = new Label();
         labels.put(id, l);
         return l;
+    }
+
+    public Label getLabel(int id) {
+        return getLabel("l" + id);
     }
 
     @Override
