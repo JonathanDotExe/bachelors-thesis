@@ -12,7 +12,7 @@ digit = "0123456789" .
 TOKENS
 // Specify the tokens (or terminal symbols) of the language (such as number or ident) by using the character set defined above.
 number = ["-"] digit { digit }.
-ident = letter { letter | digit }.
+ident = letter { "_" | letter | digit }.
 
 COMMENTS FROM "(*" TO "*)" // Multi-line comments should go from (* to *)
 COMMENTS FROM "//" TO "\n" // Single-line comments should go from // to \n
@@ -24,17 +24,17 @@ PRODUCTIONS
         {"\n" {"\n"} (Label | Instruction)}
         .
 
-    OpCode<out int op> = ident (. if (OPCODES.contains(t.val)) { op = OPCODES.get(t.val); } else { op = -1; SemErr("Unknown opcode: " + t.val); } .)
+    OpCode<out int op> = ident (. if (OPCODES_REV.containsKey(t.val.toUpperCase())) { op = OPCODES_REV.get(t.val.toUpperCase()); } else { op = -1; SemErr("Unknown opcode: " + t.val); } .)
         .
 
     Instruction =               (. boolean arg = false; .)
-        OpCode<out int op>      (. code.put(op); .)
-        [ (number               (. code.put(Integer.parseInt(t.val)); arg = true;.)
-            | ident )           (. if (op == Code.JMP_x) { code.put(0); code.getLabel(t.val).sourceHere(); } else {SemErr("Number expected for opcode " + OPCODES.get(op));} .)
-        ]                       (. if (code.hasArg(op) && !arg) {
-                                    SemErr("Argument expected for opcode " + OPCODES.get(op));
-                                } else if (!code.hasArg(op) && arg) {
-                                    SemErr("No argument expected for opcode " + OPCODES.get(op));
+        OpCode<out int op>      (. code.add(op); .)
+        [ (number               (. code.add(Integer.parseInt(t.val)); arg = true;.)
+            | ident )           (. if (op == Code.OpCode.JMP_x) { code.getLabel(t.val).sourceHereRel(-1); code.add(0); } else {SemErr("Number expected for opcode " + OPCODES_REV.get(op));} .)
+        ]                       (. if (Code.OpCode.hasArg(op) && !arg) {
+                                    SemErr("Argument expected for opcode " + OPCODES_REV.get(op));
+                                } else if (!Code.OpCode.hasArg(op) && arg) {
+                                    SemErr("No argument expected for opcode " + OPCODES_REV.get(op));
                                 } .)
         .
 

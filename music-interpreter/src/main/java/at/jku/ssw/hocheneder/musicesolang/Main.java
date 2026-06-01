@@ -5,6 +5,7 @@ import at.jku.ssw.hocheneder.musicesolang.decompiler.MusicDecompiler;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.ByteCodeIO;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Interpreter;
+import at.jku.ssw.hocheneder.musicesolang.interpreter.PlainCodeIO;
 import at.jku.ssw.hocheneder.musicesolang.player.MeasureSequencer;
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.help.HelpFormatter;
@@ -138,14 +139,21 @@ public class Main {
                     }
 
                     String filename = line.getArgs()[0];
-                    System.out.println("Loading file " + filename);
                     try (InputStream input = new FileInputStream(filename);) {
                         boolean verbose = line.hasOption(VERBOSE_OPTION);
                         if (verbose) {
                             //TODO  verbose logging
                         }
 
-                        int[] code = ByteCodeIO.loadCode(input);
+                        int[] code;
+                        if (filename.endsWith(".bin")) {
+                            System.out.println("Loading file as binary code: " + filename);
+                            code = ByteCodeIO.loadCode(input);
+                        }
+                        else {
+                            System.out.println("Loading file as plaintext code: " + filename);
+                            code = PlainCodeIO.loadCode(input);
+                        }
 
                         Interpreter.interpret(code);
                     }
@@ -281,7 +289,6 @@ public class Main {
                     }
 
                     String filename = line.getArgs()[0];
-                    System.out.println("Loading file " + filename);
                     try (InputStream input = new FileInputStream(filename);) {
 
                         String output = line.getOptionValue(OUTPUT_OPTION);
@@ -291,7 +298,15 @@ public class Main {
 
                         }
 
-                        int[] code = ByteCodeIO.loadCode(input);
+                        int[] code;
+                        if (filename.endsWith(".bin")) {
+                            System.out.println("Loading file as binary code: " + filename);
+                            code = ByteCodeIO.loadCode(input);
+                        }
+                        else {
+                            System.out.println("Loading file as plaintext code: " + filename);
+                            code = PlainCodeIO.loadCode(input);
+                        }
 
                         MusicDecompiler decompiler = new MusicDecompiler(code);
 

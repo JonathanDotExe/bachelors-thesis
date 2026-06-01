@@ -28,7 +28,7 @@ Coco/R itself) does not fall under the GNU General Public License.
 -->begin
 package at.jku.ssw.hocheneder.musicesolang.interpreter.coco;
 
-import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OPCODES;
+import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OpCode.OPCODES_REV;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
 
 public class Parser {

@@ -1,7 +1,7 @@
 
 package at.jku.ssw.hocheneder.musicesolang.interpreter.coco;
 
-import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OPCODES;
+import static at.jku.ssw.hocheneder.musicesolang.interpreter.Code.OpCode.OPCODES_REV;
 import at.jku.ssw.hocheneder.musicesolang.interpreter.Code;
 
 public class Parser {
@@ -113,27 +113,27 @@ public class Parser {
 	void Instruction() {
 		boolean arg = false; 
 		int op = OpCode();
-		code.put(op); 
+		code.add(op); 
 		if (la.kind == 1 || la.kind == 2) {
 			if (la.kind == 1) {
 				Get();
-				code.put(Integer.parseInt(t.val)); arg = true;
+				code.add(Integer.parseInt(t.val)); arg = true;
 			} else {
 				Get();
 			}
-			if (op == Code.JMP_x) { code.put(0); code.getLabel(t.val).sourceHere(); } else {SemErr("Number expected for opcode " + OPCODES.get(op));} 
+			if (op == Code.OpCode.JMP_x) { code.getLabel(t.val).sourceHereRel(-1); code.add(0); } else {SemErr("Number expected for opcode " + OPCODES_REV.get(op));} 
 		}
-		if (code.hasArg(op) && !arg) {
-		SemErr("Argument expected for opcode " + OPCODES.get(op));
-		} else if (!code.hasArg(op) && arg) {
-		SemErr("No argument expected for opcode " + OPCODES.get(op));
+		if (Code.OpCode.hasArg(op) && !arg) {
+		SemErr("Argument expected for opcode " + OPCODES_REV.get(op));
+		} else if (!Code.OpCode.hasArg(op) && arg) {
+		SemErr("No argument expected for opcode " + OPCODES_REV.get(op));
 		} 
 	}
 
 	int  OpCode() {
 		int  op;
 		Expect(2);
-		if (OPCODES.contains(t.val)) { op = OPCODES.get(t.val); } else { op = -1; SemErr("Unknown opcode: " + t.val); } 
+		if (OPCODES_REV.containsKey(t.val.toUpperCase())) { op = OPCODES_REV.get(t.val.toUpperCase()); } else { op = -1; SemErr("Unknown opcode: " + t.val); } 
 		return op;
 	}
 

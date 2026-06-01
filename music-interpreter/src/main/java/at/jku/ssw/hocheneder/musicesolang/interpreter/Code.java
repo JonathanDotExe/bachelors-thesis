@@ -43,6 +43,25 @@ public class Code {
                 Map.entry(OUT_INT, "OUT_INT")
         );
 
+        public static final Map<String, Integer> OPCODES_REV = Map.ofEntries(
+                Map.entry("JMP", JMP_x),
+                Map.entry("IS_NEG", IS_NEG),
+                Map.entry("NOT", NOT),
+                Map.entry("LOAD", LOAD_x),
+                Map.entry("STORE", STORE_x),
+                Map.entry("CONST", CONST_x),
+                Map.entry("DUP", DUP),
+                Map.entry("POP", POP),
+                Map.entry("ADD", ADD),
+                Map.entry("NEG", NEG),
+                Map.entry("MUL", MUL),
+                Map.entry("DIV", DIV),
+                Map.entry("REM", REM),
+                Map.entry("IN", IN),
+                Map.entry("OUT", OUT),
+                Map.entry("OUT_INT", OUT_INT)
+        );
+
         private OpCode() {
 
         }
@@ -154,6 +173,10 @@ public class Code {
 
         public void sourceHere() {
             sourceAddr.add(code.size() + 1);
+        }
+
+        public void sourceHereRel(int rel) {
+            sourceAddr.add(code.size() + 1 + rel);
         }
 
         public void fixup() {

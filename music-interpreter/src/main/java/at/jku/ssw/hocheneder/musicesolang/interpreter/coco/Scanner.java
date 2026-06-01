@@ -420,7 +420,7 @@ public class Scanner {
 					else {t.kind = 1; break loop;}
 				case 3:
 					recEnd = pos; recKind = 2;
-					if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'Z' || ch >= 'a' && ch <= 'z') {AddCh(); state = 3; break;}
+					if (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'Z' || ch == '_' || ch >= 'a' && ch <= 'z') {AddCh(); state = 3; break;}
 					else {t.kind = 2; break loop;}
 				case 4:
 					{t.kind = 3; break loop;}
