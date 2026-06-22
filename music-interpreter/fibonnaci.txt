@@ -1,0 +1,78 @@
+CONST 10 // n
+STORE 0
+
+CONST 1 // a
+STORE 1
+
+CONST 1 // b
+STORE 2
+
+LOAD 1
+OUT_INT
+
+CONST 10
+OUT
+
+LOAD 2
+OUT_INT
+
+CONST 10
+OUT
+
+CONST 2
+STORE 3 // i
+
+:loop
+LOAD 3
+LOAD 0
+NEG
+ADD
+IS_NEG
+NOT
+JMP end // while cond
+
+LOAD 1
+LOAD 2
+ADD
+STORE 4 // f
+
+LOAD 2
+STORE 1
+
+LOAD 4
+DUP
+STORE 2
+
+OUT_INT // print
+
+CONST 10
+OUT
+
+LOAD 3
+CONST 1
+ADD
+STORE 3 //i++
+
+CONST 1
+JMP loop
+
+:end
+
+
+/*
+int n = 10;
+int a = 1;
+int b = 1;
+
+printInt(a);
+printInt(b);
+
+for (int i = 2; i < n; i++) {
+    int f = a + b;
+    a = b;
+    b = f;
+    printInt(b);
+}
+
+
+*/
