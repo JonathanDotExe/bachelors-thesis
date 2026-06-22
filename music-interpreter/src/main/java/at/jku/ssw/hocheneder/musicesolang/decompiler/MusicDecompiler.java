@@ -113,6 +113,20 @@ public class MusicDecompiler {
         bufferMeasure.setNumber(count++ + "");
         part.getMeasure().add(bufferMeasure);
 
+        //Resolve labels
+        int id = 0;
+        for (Map.Entry<Integer, DecompilerLabel> entry : labels.entrySet()) {
+            if (measures.containsKey(entry.getKey())) {
+                ScorePartwise.Part.Measure measure = measures.get(entry.getKey());
+                //Fixup
+                entry.getValue().fixup(root, id);
+            }
+            else {
+                throw new IllegalArgumentException("Invalid jump in code.");
+            }
+            id++;
+        }
+
         //Normalize note values
         for (ScorePartwise.Part.Measure measure : part.getMeasure()) {
             int amount = findNoteCount(measure);
@@ -176,8 +190,7 @@ public class MusicDecompiler {
             }
         }
 
-        //Resolve labels
-        int id = 0;
+        //Add label barlines
         for (Map.Entry<Integer, DecompilerLabel> entry : labels.entrySet()) {
             if (measures.containsKey(entry.getKey())) {
                 ScorePartwise.Part.Measure measure = measures.get(entry.getKey());
@@ -189,14 +202,10 @@ public class MusicDecompiler {
                 barline.setLocation(RightLeftMiddle.RIGHT);
 
                 measure.getNoteOrBackupOrForward().add(barline);
-
-                //Fixup
-                entry.getValue().fixup(root, id);
             }
             else {
                 throw new IllegalArgumentException("Invalid jump in code.");
             }
-            id++;
         }
 
         //Attributes

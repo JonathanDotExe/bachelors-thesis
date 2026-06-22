@@ -37,7 +37,7 @@ ADD
 STORE 4 // f
 
 LOAD 2
-STORE 1
+STORE 1 // a = b
 
 LOAD 4
 DUP
