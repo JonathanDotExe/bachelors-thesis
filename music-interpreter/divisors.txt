@@ -2,6 +2,7 @@ const 60
 store 0
 const 1
 store 1
+
 :loop_start
 load 0
 load 1
@@ -17,6 +18,7 @@ load 1
 out_int
 const 10
 out
+
 :skip_print
 const 1
 load 1
@@ -24,4 +26,6 @@ add
 store 1
 const 1
 jmp loop_start
+
 :end
+

@@ -16,13 +16,14 @@ ident = letter { "_" | letter | digit }.
 
 COMMENTS FROM "(*" TO "*)" // Multi-line comments should go from (* to *)
 COMMENTS FROM "//" TO "\n" // Single-line comments should go from // to \n
-IGNORE '\r' + '\t' // Ignore following symbols as whitespace: \r and \t.
+IGNORE '\r' + '\t' + ' ' // Ignore following symbols as whitespace: \r and \t.
 
 PRODUCTIONS
     PlainCode =
-        [Label | Instruction]
-        {"\n" {"\n"} (Label | Instruction)}
+        Statement
         .
+
+    Statement = (Label | Instruction) ["\n" {"\n"} [Statement]].
 
     OpCode<out int op> = ident (. if (OPCODES_REV.containsKey(t.val.toUpperCase())) { op = OPCODES_REV.get(t.val.toUpperCase()); } else { op = -1; SemErr("Unknown opcode: " + t.val); } .)
         .
@@ -30,8 +31,8 @@ PRODUCTIONS
     Instruction =               (. boolean arg = false; .)
         OpCode<out int op>      (. code.add(op); .)
         [ (number               (. code.add(Integer.parseInt(t.val)); arg = true;.)
-            | ident )           (. if (op == Code.OpCode.JMP_x) { code.getLabel(t.val).sourceHereRel(-1); code.add(0); } else {SemErr("Number expected for opcode " + OPCODES_REV.get(op));} .)
-        ]                       (. if (Code.OpCode.hasArg(op) && !arg) {
+            | ident            (. arg = true; if (op == Code.OpCode.JMP_x) { code.getLabel(t.val).sourceHereRel(-1); code.add(0); } else {SemErr("Number expected for opcode " + OPCODES_REV.get(op));} .)
+        )]                       (. if (Code.OpCode.hasArg(op) && !arg) {
                                     SemErr("Argument expected for opcode " + OPCODES_REV.get(op));
                                 } else if (!Code.OpCode.hasArg(op) && arg) {
                                     SemErr("No argument expected for opcode " + OPCODES_REV.get(op));

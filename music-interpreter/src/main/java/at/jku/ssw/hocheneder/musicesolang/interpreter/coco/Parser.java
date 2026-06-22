@@ -84,23 +84,23 @@ public class Parser {
 	}
 	
 	void PlainCode() {
-		if (la.kind == 2 || la.kind == 4) {
-			if (la.kind == 4) {
-				Label();
-			} else {
-				Instruction();
-			}
-		}
-		while (la.kind == 3) {
+		Statement();
+	}
+
+	void Statement() {
+		if (la.kind == 4) {
+			Label();
+		} else if (la.kind == 2) {
+			Instruction();
+		} else SynErr(6);
+		if (la.kind == 3) {
 			Get();
 			while (la.kind == 3) {
 				Get();
 			}
-			if (la.kind == 4) {
-				Label();
-			} else if (la.kind == 2) {
-				Instruction();
-			} else SynErr(6);
+			if (la.kind == 2 || la.kind == 4) {
+				Statement();
+			}
 		}
 	}
 
@@ -120,8 +120,8 @@ public class Parser {
 				code.add(Integer.parseInt(t.val)); arg = true;
 			} else {
 				Get();
+				arg = true; if (op == Code.OpCode.JMP_x) { code.getLabel(t.val).sourceHereRel(-1); code.add(0); } else {SemErr("Number expected for opcode " + OPCODES_REV.get(op));} 
 			}
-			if (op == Code.OpCode.JMP_x) { code.getLabel(t.val).sourceHereRel(-1); code.add(0); } else {SemErr("Number expected for opcode " + OPCODES_REV.get(op));} 
 		}
 		if (Code.OpCode.hasArg(op) && !arg) {
 		SemErr("Argument expected for opcode " + OPCODES_REV.get(op));
@@ -181,7 +181,7 @@ class Errors {
 			case 3: s = "\"\\n\" expected"; break;
 			case 4: s = "\":\" expected"; break;
 			case 5: s = "??? expected"; break;
-			case 6: s = "invalid PlainCode"; break;
+			case 6: s = "invalid Statement"; break;
 			default: s = "error " + n; break;
 		}
 		printMsg(line, col, s);
