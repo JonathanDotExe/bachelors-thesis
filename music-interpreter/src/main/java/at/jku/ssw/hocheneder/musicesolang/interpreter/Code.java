@@ -126,9 +126,26 @@ public class Code {
     public String toString() {
         StringBuilder str = new StringBuilder();
         boolean arg = false;
+        int i = 0;
         for (int op : code) {
+            // Target label
+            for (var l : labels.entrySet()) {
+                if (l.getValue().isTargetOf(i)) {
+                    str.append(":");
+                    str.append(l.getKey());
+                    str.append(System.lineSeparator());
+                }
+            }
+
             if (arg) {
-                str.append(op);
+                // Source label
+                String label = findSourceLabelForOp(i);
+                if (label != null) {
+                    str.append(label);
+                }
+                else {
+                    str.append(op);
+                }
                 str.append(System.lineSeparator());
                 arg = false;
             }
@@ -143,9 +160,19 @@ public class Code {
                     }
                 }
             }
+            i++;
         }
 
         return str.toString();
+    }
+
+    private String findSourceLabelForOp(int index) {
+        for (var l : labels.entrySet()) {
+            if (l.getValue().isSourceOf(index)) {
+                return l.getKey();
+            }
+        }
+        return null;
     }
 
     public static String opToString(int[] code, int index) {
@@ -160,7 +187,7 @@ public class Code {
     }
 
     public class Label {
-        private List<Integer> sourceAddr = new ArrayList<>();
+        private final List<Integer> sourceAddr = new ArrayList<>();
         private int targetAddr = -1;
 
         public void targetHere() {
@@ -177,6 +204,14 @@ public class Code {
 
         public void sourceHereRel(int rel) {
             sourceAddr.add(code.size() + 1 + rel);
+        }
+
+        public boolean isSourceOf(int addr) {
+            return sourceAddr.contains(addr);
+        }
+
+        public boolean isTargetOf(int addr) {
+            return targetAddr == addr;
         }
 
         public void fixup() {

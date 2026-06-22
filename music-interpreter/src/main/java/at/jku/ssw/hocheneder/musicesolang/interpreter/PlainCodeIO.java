@@ -5,6 +5,9 @@ import at.jku.ssw.hocheneder.musicesolang.interpreter.coco.Scanner;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.ByteBuffer;
 
 public class PlainCodeIO {
 
@@ -16,6 +19,12 @@ public class PlainCodeIO {
             parser.Parse();
 
             return code.getCode();
+        }
+    }
+
+    public static void writeCode(Code code, OutputStream out) throws IOException {
+        try (PrintStream pr = new PrintStream(out)) {
+            pr.print(code.toString());
         }
     }
 

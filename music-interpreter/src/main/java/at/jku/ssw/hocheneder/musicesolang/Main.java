@@ -235,7 +235,7 @@ public class Main {
                     System.out.println("Loading file " + filename);
                     try (InputStream input = new FileInputStream(filename);) {
                         boolean noMeasure = line.hasOption(NO_MEASURES_OPTION);
-                        boolean plain = line.hasOption(PLAIN_OPTION); //TODO
+                        boolean plain = line.hasOption(PLAIN_OPTION);
 
                         String part = line.getOptionValue(PART_OPTION);
                         if (part == null || part.isBlank()) {
@@ -245,7 +245,7 @@ public class Main {
                         String output = line.getOptionValue(OUTPUT_OPTION);
                         if (output == null || output.isBlank()) {
                             int lastIndex = filename.lastIndexOf( '.');
-                            output = filename.substring(0, lastIndex >= 0 ? lastIndex : filename.length()) + ".bin";
+                            output = filename.substring(0, lastIndex >= 0 ? lastIndex : filename.length()) + (plain ? ".txt" : ".bin");
 
                         }
 
@@ -257,14 +257,18 @@ public class Main {
                         System.out.println("Generated code:");
                         System.out.println(code);
 
-                        int[] c = code.getCode();
-
                         System.out.println();
                         System.out.println("Writing to file " + output + "... ");
                         System.out.println();
 
                         try (FileOutputStream out = new FileOutputStream(output)) {
-                            ByteCodeIO.writeCode(c, out);
+                            if (plain) {
+                                PlainCodeIO.writeCode(code, out);
+                            }
+                            else {
+                                int[] c = code.getCode();
+                                ByteCodeIO.writeCode(c, out);
+                            }
                         }
 
                         System.out.println();
